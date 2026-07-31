@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Admin\SecurityController;
 use App\Http\Controllers\Api\Admin\SemaphoreController;
 use App\Http\Controllers\Api\Admin\StatsController;
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\VehicleCatalogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BeforeAfterController;
 use App\Http\Controllers\Api\BlogController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Api\BuildUpdateController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InquiryController;
 use App\Http\Controllers\Api\ManyChatController;
 use App\Http\Controllers\Api\NotificationController;
@@ -57,6 +59,8 @@ use Illuminate\Support\Facades\Route;
 //
 // Public/Unauthenticated Routes
 //
+Route::get('/health', [HealthController::class, 'check']);
+
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
@@ -64,7 +68,9 @@ Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/auth/verify-email', [AuthController::class, 'verifyEmail']);
 
 Route::post('/bookings', [BookingController::class, 'create']);
+Route::post('/booking/external', [BookingController::class, 'externalCreate']);
 Route::get('/bookings/availability', [BookingController::class, 'availability']);
+Route::post('/bookings/media', [BookingController::class, 'uploadMedia']);
 
 Route::post('/inquiries', [InquiryController::class, 'create']);
 
@@ -97,6 +103,9 @@ Route::get('/portfolio-categories/{id}', [PortfolioCategoryController::class, 'g
 // Admin backdoor (should ideally be protected, keeping public for dev/migration parity)
 Route::post('/admin/cron/daily', [CronController::class, 'daily']);
 Route::post('/admin/cron/process-queue', [CronController::class, 'processQueue']);
+Route::post('/admin/cron/notification-queue', [CronController::class, 'notificationQueue']);
+Route::post('/admin/cron/waitlist-autofill', [CronController::class, 'waitlistAutofill']);
+Route::post('/admin/cron/appointment-reminders', [CronController::class, 'appointmentReminders']);
 Route::post('/admin/migrate', [MigrationController::class, 'up']);
 Route::get('/admin/migrate', [MigrationController::class, 'status']);
 
@@ -109,7 +118,7 @@ Route::middleware(['optional.auth'])->group(function () {
 
     Route::get('/services', [ServiceController::class, 'list']);
     Route::get('/services/{id}', [ServiceController::class, 'get'])->where('id', '\d+');
-    Route::get('/services/slug/{slug}', [ServiceController::class, 'getBySlug']);
+    Route::get('/services/{slug}', [ServiceController::class, 'getBySlug'])->where('slug', '[a-z0-9\-]+');
 
     Route::get('/products', [ProductController::class, 'list']);
     Route::get('/products/{id}', [ProductController::class, 'get']);
@@ -299,6 +308,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/roles', [RoleController::class, 'create']);
     Route::put('/admin/roles/{id}', [RoleController::class, 'update']);
     Route::delete('/admin/roles/{id}', [RoleController::class, 'delete']);
+
+    // Admin Vehicle Catalog
+    Route::get('/admin/vehicle-makes', [VehicleCatalogController::class, 'listMakes']);
+    Route::post('/admin/vehicle-makes', [VehicleCatalogController::class, 'createMake']);
+    Route::put('/admin/vehicle-makes/{id}', [VehicleCatalogController::class, 'updateMake'])->where('id', '\d+');
+    Route::delete('/admin/vehicle-makes/{id}', [VehicleCatalogController::class, 'deleteMake'])->where('id', '\d+');
+
+    Route::get('/admin/vehicle-models', [VehicleCatalogController::class, 'listModels']);
+    Route::post('/admin/vehicle-models', [VehicleCatalogController::class, 'createModel']);
+    Route::put('/admin/vehicle-models/{id}', [VehicleCatalogController::class, 'updateModel'])->where('id', '\d+');
+    Route::delete('/admin/vehicle-models/{id}', [VehicleCatalogController::class, 'deleteModel'])->where('id', '\d+');
 
     // Admin Security
     Route::get('/admin/security/audit', [SecurityController::class, 'auditList']);

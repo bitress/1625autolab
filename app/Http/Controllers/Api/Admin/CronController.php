@@ -49,4 +49,55 @@ class CronController extends Controller
             ], 500);
         }
     }
+
+    public function notificationQueue(Request $request)
+    {
+        try {
+            Artisan::call('app:cron-notification-queue');
+            $output = Artisan::output();
+
+            return response()->json([
+                'output' => trim($output),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function waitlistAutofill(Request $request)
+    {
+        try {
+            Artisan::call('app:cron-waitlist-autofill');
+            $output = Artisan::output();
+
+            return response()->json([
+                'output' => trim($output),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function appointmentReminders(Request $request)
+    {
+        try {
+            Artisan::call('app:cron-appointment-reminders');
+            $output = Artisan::output();
+
+            return response()->json([
+                'output' => trim($output),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
