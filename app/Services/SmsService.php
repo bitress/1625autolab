@@ -4,15 +4,516 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * Sends SMS notifications via the Semaphore REST API.
+ *
+ * Booking alert recipients are active owner/admin users from DB
+ * (filtered by SMS notification preferences).
+ *
+ * All methods fail silently when Semaphore credentials are not configured, so
+ * the booking flow is never interrupted by missing SMS setup.
+ */
 class SmsService
 {
+    private const API_URL = 'https://api.semaphore.co/api/v4/messages';
+
+    private string $apiKey;
+
+    private string $senderName;
+
+    private bool $enabled;
+
+    public function __construct()
+    {
+        $this->apiKey = config('services.semaphore.api_key', '');
+        $this->senderName = config('services.semaphore.sender_name', '1625AutoLab');
+        $this->enabled = $this->apiKey !== '';
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Public methods
+    // ─────────────────────────────────────────────────────────────────────────
+
     /**
-     * Send an appointment reminder SMS.
+     * Send a new-booking SMS to the client.
+     *
+     * @param  array<string, mixed>  $booking
+     */
+    public function bookingCreated(array $booking): void
+    {
+        $phone = $this->normalisePhone((string) ($booking['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = (string) ($booking['name'] ?? 'there');
+        $service = (string) ($booking['serviceName'] ?? 'your service');
+        $date = (string) ($booking['appointmentDate'] ?? '');
+        $time = (string) ($booking['appointmentTime'] ?? '');
+        $refNumber = (string) ($booking['referenceNumber'] ?? '');
+
+        $this->send(
+            $phone,
+            "Hi {$name}! Your booking for {$service} on {$date} at {$time} has been received."
+          .($refNumber !== '' ? " Reference: {$refNumber}." : '')
+          .' We will confirm your appointment shortly. - 1625 Auto Lab'
+        );
+    }
+
+    /**
+     * Send a new-booking alert SMS to the admin.
+     *
+     * @param  array<string, mixed>  $booking
+     */
+    public function bookingCreatedAdmin(array $booking): void
+    {
+        $name = (string) ($booking['name'] ?? 'Unknown');
+        $service = (string) ($booking['serviceName'] ?? 'Unknown service');
+        $date = (string) ($booking['appointmentDate'] ?? '');
+        $time = (string) ($booking['appointmentTime'] ?? '');
+        $refNumber = (string) ($booking['referenceNumber'] ?? '');
+
+        $message = 'New booking received!'
+            .($refNumber !== '' ? " Ref: {$refNumber}." : '')
+            ." Client: {$name}. Service: {$service}. Date: {$date} at {$time}. - 1625 Auto Lab";
+
+        foreach ($this->fetchAlertRecipients('new_booking') as $phone) {
+            $this->send($phone, $message);
+        }
+    }
+
+    /**
+     * Send a customer-inquiry alert SMS to admins/owners.
+     *
+     * @param  array<string, mixed>  $inquiry
+     */
+    public function customerInquiryAdmin(array $inquiry): void
+    {
+        $name = (string) ($inquiry['fullName'] ?? $inquiry['name'] ?? 'A customer');
+        $email = trim((string) ($inquiry['emailAddress'] ?? $inquiry['email'] ?? ''));
+        $customerPhone = $this->normalisePhone((string) ($inquiry['contactNumber'] ?? $inquiry['phone'] ?? ''));
+
+        $product = (string) ($inquiry['productToPurchase'] ?? '');
+        $make = (string) ($inquiry['make'] ?? '');
+        $model = (string) ($inquiry['model'] ?? '');
+        $otherModel = (string) ($inquiry['otherModel'] ?? '');
+        $year = trim((string) ($inquiry['yearModel'] ?? ''));
+        $plate = trim((string) ($inquiry['plateNumber'] ?? ''));
+        $address = trim((string) ($inquiry['address'] ?? ''));
+        $facebook = trim((string) ($inquiry['facebookName'] ?? ''));
+
+        $date = trim((string) ($inquiry['appointmentDate'] ?? ''));
+        $time = trim((string) ($inquiry['appointmentTime'] ?? ''));
+
+        $vehicle = trim($make.' '.($model === 'Other Model' ? $otherModel : $model));
+
+        $message = "NEW CUSTOMER INQUIRY\n\n"
+            ."Customer\n"
+            ."Name: {$name}\n"
+            .($customerPhone !== '' ? "Phone: {$customerPhone}\n" : '')
+            .($email !== '' ? "Email: {$email}\n" : '')
+            .($facebook !== '' ? "Facebook: {$facebook}\n" : '')
+            .($address !== '' ? "Address: {$address}\n" : '')
+            ."\nVehicle\n"
+            .($vehicle !== '' ? "Vehicle: {$vehicle}\n" : '')
+            .($year !== '' ? "Year: {$year}\n" : '')
+            .($plate !== '' ? "Plate: {$plate}\n" : '')
+            ."\nInquiry\n"
+            .($product !== '' ? "Product/Service: {$product}\n" : '')
+            .($date !== '' ? "Preferred Date: {$date}\n" : '')
+            .($time !== '' ? "Preferred Time: {$time}\n" : '')
+            ."\nPlease follow up with the customer.\n\n"
+            .'- 1625 Autolab';
+
+        foreach ($this->fetchAlertRecipients('new_inquiry') as $recipientPhone) {
+            $this->send($recipientPhone, $message);
+        }
+    }
+
+    /**
+     * Send a confirmation SMS to the customer who submitted an inquiry.
+     *
+     * @param  array<string, mixed>  $inquiry
+     */
+    public function customerInquiryCustomer(array $inquiry): void
+    {
+        $phone = $this->normalisePhone((string) ($inquiry['contactNumber'] ?? $inquiry['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = trim((string) ($inquiry['fullName'] ?? $inquiry['name'] ?? 'there'));
+        $date = trim((string) ($inquiry['appointmentDate'] ?? ''));
+        $time = trim((string) ($inquiry['appointmentTime'] ?? ''));
+
+        $message = "Hi {$name}!\n\n"
+            ."Thank you for booking an installation service with us. Your appointment has been successfully received.\n\n"
+            .($date !== '' ? "Date: {$date}\n" : '')
+            .($time !== '' ? "Time: {$time}\n\n" : "\n")
+            ."Our team will contact you before the scheduled appointment to confirm your booking and provide any necessary updates.\n\n"
+            ."If you need to reschedule or have any questions, simply contact us on our Facebook page.\n\n"
+            .'Thank you for choosing us—we look forward to serving you!';
+
+        $this->send($phone, $message);
+    }
+
+    /**
+     * Send a status-change SMS to the customer whose inquiry was updated.
+     *
+     * Uses contactNumber (inquiry field) instead of booking's phone.
+     *
+     * @param  array<string, mixed>  $inquiry
+     */
+    public function inquiryStatusChanged(array $inquiry): void
+    {
+        $phone = $this->normalisePhone((string) ($inquiry['contactNumber'] ?? $inquiry['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = trim((string) ($inquiry['fullName'] ?? $inquiry['name'] ?? 'there'));
+        $product = trim((string) ($inquiry['productToPurchase'] ?? ''));
+        $status = ucwords(str_replace('_', ' ', trim((string) ($inquiry['status'] ?? ''))));
+        $date = trim((string) ($inquiry['appointmentDate'] ?? ''));
+        $time = trim((string) ($inquiry['appointmentTime'] ?? ''));
+
+        $dateStr = $date !== '' ? " on {$date}".($time !== '' ? " at {$time}" : '') : '';
+        $serviceStr = $product !== '' ? " for {$product}" : '';
+
+        $this->send(
+            $phone,
+            "Hi {$name}! Your service request{$serviceStr}{$dateStr} status is now: {$status}. "
+          .'Questions? Message us on Facebook. - 1625 Autolab'
+        );
+    }
+
+    /**
+     * Send a booking confirmation SMS to the client.
+     *
+     * @param  array<string, mixed>  $booking
+     */
+    public function bookingConfirmed(array $booking): void
+    {
+        $phone = $this->normalisePhone((string) ($booking['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = (string) ($booking['name'] ?? 'there');
+        $service = (string) ($booking['serviceName'] ?? 'your service');
+        $date = (string) ($booking['appointmentDate'] ?? '');
+        $time = (string) ($booking['appointmentTime'] ?? '');
+
+        $this->send(
+            $phone,
+            "Hi {$name}! Your booking for {$service} on {$date} at {$time} has been CONFIRMED. "
+          .'- 1625 Auto Lab'
+        );
+    }
+
+    /**
+     * Send a status-change SMS to the client.
+     *
+     * @param  array<string, mixed>  $booking
+     */
+    public function bookingStatusChanged(array $booking): void
+    {
+        $phone = $this->normalisePhone((string) ($booking['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = (string) ($booking['name'] ?? 'there');
+        $service = (string) ($booking['serviceName'] ?? 'your service');
+        $status = ucwords(str_replace('_', ' ', (string) ($booking['status'] ?? '')));
+
+        $this->send(
+            $phone,
+            "Hi {$name}! Your {$service} booking status is now: {$status}. - 1625 Auto Lab"
+        );
+    }
+
+    /**
+     * Send an appointment reminder SMS 24 h before.
      *
      * @param  array<string, mixed>  $booking
      */
     public function appointmentReminder(array $booking): void
     {
-        throw new \RuntimeException('SmsService::appointmentReminder() not implemented.', 501);
+        $phone = $this->normalisePhone((string) ($booking['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = (string) ($booking['name'] ?? 'po');
+        $service = (string) ($booking['serviceName'] ?? $booking['service_name'] ?? 'inyong serbisyo');
+        $time = (string) ($booking['appointmentTime'] ?? $booking['appointment_time'] ?? '');
+
+        $this->send(
+            $phone,
+            "Hello {$name}! Just a reminder - your appointment for {$service}"
+          .($time !== '' ? " at {$time}" : '')
+          ." is tomorrow. Please don't forget to come to 1625 Auto Lab."
+        );
+    }
+
+    /**
+     * Send 3-hour prior appointment reminder SMS to customer.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function appointmentReminder3hCustomer(array $data): void
+    {
+        $phone = $this->normalisePhone((string) ($data['contactNumber'] ?? $data['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = (string) ($data['fullName'] ?? $data['name'] ?? 'po');
+        $service = (string) ($data['productToPurchase'] ?? $data['serviceName'] ?? $data['service_name'] ?? 'your appointment');
+        $time = (string) ($data['appointmentTime'] ?? $data['appointment_time'] ?? '');
+
+        $timeStr = $time !== '' ? $time : 'scheduled time';
+
+        $this->send(
+            $phone,
+            "Hi {$name}!\n\n"
+          ."This is a friendly reminder from 1625 AutoLab: Your appointment is at {$timeStr} today, which is 3 hours from now.\n"
+          ."Please arrive on time or message us on our facebook page if you need to reschedule.\n\n"
+          .'Thank you!'
+        );
+    }
+
+    /**
+     * Send 3-hour prior appointment reminder SMS to admin/owner.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function appointmentReminder3hAdmin(array $data): void
+    {
+        $recipients = $this->fetchAlertRecipients('new_booking');
+        if (count($recipients) === 0) {
+            return;
+        }
+
+        $name = (string) ($data['fullName'] ?? $data['name'] ?? 'A customer');
+        $time = (string) ($data['appointmentTime'] ?? $data['appointment_time'] ?? '');
+        $make = (string) ($data['make'] ?? '');
+        $model = (string) ($data['model'] ?? '');
+        $vehicle = (string) ($data['vehicleInfo'] ?? $data['vehicle'] ?? '');
+        if ($vehicle === '' && ($make !== '' || $model !== '')) {
+            $vehicle = trim($make.' '.$model);
+        }
+        if ($vehicle === '') {
+            $vehicle = 'Vehicle';
+        }
+
+        $timeStr = $time !== '' ? $time : 'scheduled time';
+
+        $message = "Appointment Reminder: {$name} - {$vehicle} is scheduled for {$timeStr} today (in 3 hrs). Please ensure the team and materials are ready.";
+
+        foreach ($recipients as $adminPhone) {
+            $this->send($adminPhone, $message);
+        }
+    }
+
+    /**
+     * Notify a waitlisted customer that a slot has become available.
+     *
+     * @param  array<string, mixed>  $data  Keys: name, phone, date, time
+     */
+    public function waitlistSlotAvailable(array $data): void
+    {
+        $phone = $this->normalisePhone((string) ($data['phone'] ?? ''));
+        if ($phone === '') {
+            return;
+        }
+
+        $name = (string) ($data['name'] ?? 'po');
+        $date = (string) ($data['date'] ?? '');
+        $time = (string) ($data['time'] ?? '');
+
+        $this->send(
+            $phone,
+            "Hi {$name}! Magandang balita - may bakanteng slot na sa {$date}"
+          .($time !== '' ? " at {$time}" : '').'. '
+          .'I-book na agad bago maubusan! - 1625 Auto Lab'
+        );
+    }
+
+    /**
+     * Notify a staff member (technician) that a booking has been assigned to them.
+     *
+     * @param  array<string, mixed>  $booking  The booking record
+     * @param  string  $techPhone  The technician's phone number
+     * @param  string  $techName  The technician's name
+     */
+    public function staffAssigned(array $booking, string $techPhone, string $techName, ?int $techUserId = null): void
+    {
+        $phone = $this->normalisePhone($techPhone);
+        if ($phone === '') {
+            return;
+        }
+
+        // Respect the technician's SMS assignment preference when we have their user ID.
+        if ($techUserId !== null && class_exists(NotificationPreferencesService::class)) {
+            try {
+                $prefs = app(NotificationPreferencesService::class);
+                if (! $prefs->smsEnabled($techUserId, 'assignment')) {
+                    return;
+                }
+            } catch (\Throwable) {
+                // Preferences unavailable – send anyway.
+            }
+        }
+
+        $client = (string) ($booking['name'] ?? 'a client');
+        $service = (string) ($booking['serviceName'] ?? 'a service');
+        $date = (string) ($booking['appointmentDate'] ?? '');
+        $time = (string) ($booking['appointmentTime'] ?? '');
+        $refNumber = (string) ($booking['referenceNumber'] ?? '');
+
+        $this->send(
+            $phone,
+            "Hi {$techName}! You have been assigned to a booking."
+          .($refNumber !== '' ? " Ref: {$refNumber}." : '')
+          ." Client: {$client}. Service: {$service}."
+          .($date !== '' ? " Date: {$date}".($time !== '' ? " at {$time}" : '').'.' : '')
+          .' - 1625 Auto Lab'
+        );
+    }
+
+    /**
+     * Send a generic campaign SMS to a client.
+     */
+    public function marketingCampaignMessage(string $phone, string $message): void
+    {
+        $to = $this->normalisePhone($phone);
+        if ($to === '') {
+            return;
+        }
+
+        $text = trim($message);
+        if ($text === '') {
+            return;
+        }
+
+        $this->send($to, mb_substr($text, 0, 480));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Private helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Return normalised phone numbers for all admin/owner users who have opted
+     * in to the given SMS alert type.
+     *
+     * @return string[]
+     */
+    private function fetchAlertRecipients(string $smsType): array
+    {
+        try {
+            $users = DB::table('users')
+                ->select('id', 'phone')
+                ->whereIn('role', ['admin', 'owner'])
+                ->whereNotNull('phone')
+                ->where('phone', '!=', '')
+                ->where(function ($query) {
+                    $query->whereNull('is_active')
+                        ->orWhere('is_active', 1);
+                })
+                ->get();
+        } catch (\Throwable) {
+            return [];
+        }
+
+        $prefs = class_exists(NotificationPreferencesService::class)
+            ? app(NotificationPreferencesService::class)
+            : null;
+
+        $phones = [];
+        foreach ($users as $row) {
+            $userId = (int) $row->id;
+            $phone = $this->normalisePhone((string) $row->phone);
+            if ($phone === '') {
+                continue;
+            }
+            // Check preference – default true when preferences unavailable.
+            $allowed = ($prefs === null) || $prefs->smsEnabled($userId, $smsType);
+            if ($allowed) {
+                $phones[] = $phone;
+            }
+        }
+
+        return array_values(array_unique($phones));
+    }
+
+    /**
+     * POST to the Semaphore Messages API using Laravel's Http facade.
+     */
+    private function send(string $to, string $body): void
+    {
+        if (! $this->enabled) {
+            return;
+        }
+
+        try {
+            $response = Http::timeout(10)
+                ->asForm()
+                ->acceptJson()
+                ->post(self::API_URL, [
+                    'apikey' => $this->apiKey,
+                    'number' => $to,
+                    'message' => $body,
+                    'sendername' => $this->senderName,
+                ]);
+
+            if ($response->failed()) {
+                $errorMessage = $response->json('message') ?? $response->body();
+                if (trim($errorMessage) === '') {
+                    $errorMessage = 'Unknown Semaphore error';
+                }
+
+                Log::error('[SmsService] Semaphore SMS failed for '.substr($to, 0, 4).'****', [
+                    'status' => $response->status(),
+                    'error' => $errorMessage,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error('[SmsService] Failed to send SMS to '.substr($to, 0, 4).'****', [
+                'exception' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Normalise a phone number to the format accepted by Semaphore (no leading +).
+     *
+     * Accepts:  09171234567  → 639171234567
+     *           +639171234567 → 639171234567
+     *           639171234567  → 639171234567 (unchanged)
+     *
+     * Returns '' if normalisation is not possible.
+     */
+    private function normalisePhone(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone);
+        if ($digits === null || $digits === '') {
+            return '';
+        }
+
+        if (str_starts_with($digits, '0') && strlen($digits) === 11) {
+            return '63'.substr($digits, 1);       // 09XXXXXXXXX → 639XXXXXXXXX
+        }
+        if (str_starts_with($digits, '63') && strlen($digits) === 12) {
+            return $digits;                          // already 639XXXXXXXXX
+        }
+
+        return '';
     }
 }

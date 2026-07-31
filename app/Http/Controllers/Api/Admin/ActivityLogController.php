@@ -5,31 +5,41 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
 {
+    public function __construct(private readonly ActivityLogService $activityLogService) {}
+
     public function users(Request $request)
     {
-        // TODO: In the original codebase, this queried Spatie ActivityLog models.
-        // Assuming there is a service or we can use the Model directly here for admin lists.
-        // For the scope of this migration, we'll return a stubbed response for now,
-        // to be filled when Eloquent models are scaffolded.
+        $sort = $request->query('sort', 'most_recent');
+        $logs = $this->activityLogService->summarizeByUsers((string) $sort);
 
         return response()->json([
             'success' => true,
-            'message' => 'User activity logs retrieved.',
-            'data' => ['logs' => []],
+            'message' => 'User activity summary retrieved.',
+            'data' => ['logs' => $logs],
         ]);
     }
 
     public function list(Request $request)
     {
-        // General activity log list.
+        $userId = $request->query('user_id');
+        $limit = (int) $request->query('limit', 200);
+
+        if ($userId) {
+            $logs = $this->activityLogService->listByCauserUser((int) $userId, $limit);
+        } else {
+            // General activity log list.
+            $logs = $this->activityLogService->list($limit);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Activity logs retrieved.',
-            'data' => ['logs' => []],
+            'data' => ['logs' => $logs],
         ]);
     }
 }

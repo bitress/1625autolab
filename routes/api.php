@@ -14,7 +14,6 @@ use App\Http\Controllers\Api\Admin\SecurityController;
 use App\Http\Controllers\Api\Admin\SemaphoreController;
 use App\Http\Controllers\Api\Admin\StatsController;
 use App\Http\Controllers\Api\Admin\UserController;
-use App\Http\Controllers\Api\Admin\VehicleCatalogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BeforeAfterController;
 use App\Http\Controllers\Api\BlogController;
@@ -325,17 +324,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/admin/inventory/purchase-orders', [InventoryController::class, 'purchaseOrderList']);
     Route::post('/admin/inventory/purchase-orders', [InventoryController::class, 'purchaseOrderCreate']);
     Route::put('/admin/inventory/purchase-orders/{id}', [InventoryController::class, 'purchaseOrderStatus']);
-
-    // Admin Vehicle Catalog
-    Route::get('/admin/vehicle-catalog/makes', [VehicleCatalogController::class, 'makesList']);
-    Route::post('/admin/vehicle-catalog/makes', [VehicleCatalogController::class, 'makesCreate']);
-    Route::put('/admin/vehicle-catalog/makes/{id}', [VehicleCatalogController::class, 'makesUpdate']);
-    Route::delete('/admin/vehicle-catalog/makes/{id}', [VehicleCatalogController::class, 'makesDelete']);
-    Route::get('/admin/vehicle-catalog/models', [VehicleCatalogController::class, 'modelsList']);
-    Route::post('/admin/vehicle-catalog/models', [VehicleCatalogController::class, 'modelsCreate']);
-    Route::put('/admin/vehicle-catalog/models/{id}', [VehicleCatalogController::class, 'modelsUpdate']);
-    Route::delete('/admin/vehicle-catalog/models/{id}', [VehicleCatalogController::class, 'modelsDelete']);
-
     // Admin Stats
     Route::get('/admin/stats/dashboard', [StatsController::class, 'dashboard']);
 

@@ -4,20 +4,207 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
+
+/**
+ * Manages per-user notification preferences (email vs in-app per event type).
+ *
+ * A row is created with all defaults (everything enabled) the first time
+ * a user fetches or saves their preferences.  This means a missing row is
+ * equivalent to "all on" so the UI can reliably toggle individual channels.
+ */
 class NotificationPreferencesService
 {
-    /** @return array<string, mixed>|null */
-    public function getForUser(int $userId): ?array
+    // ─────────────────────────────────────────────────────────────────────────
+    // Public API
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Return the preferences for a user, creating the default row if needed.
+     *
+     * @return array<string, mixed>
+     */
+    public function getForUser(int $userId): array
     {
-        throw new \RuntimeException('NotificationPreferencesService::getForUser() not implemented.', 501);
+        $row = $this->fetchRow($userId);
+        if ($row === null) {
+            $this->ensureRow($userId);
+            $row = $this->fetchRow($userId);
+        }
+
+        return $this->format((array) ($row ?? []));
     }
 
     /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
+     * Upsert preferences from the validated payload.
+     *
+     * @param  array<string, mixed>  $data  Keys are the column names minus the
+     *                                      leading "email_" / "inapp_" prefix.
+     * @return array<string, mixed> Updated preferences
      */
     public function save(int $userId, array $data): array
     {
-        throw new \RuntimeException('NotificationPreferencesService::save() not implemented.', 501);
+        $this->ensureRow($userId);
+
+        $allowed = [
+            'email_new_booking',
+            'email_new_order',
+            'email_order_created',
+            'email_order_status',
+            'email_order_tracking',
+            'email_status_changed',
+            'email_build_update',
+            'email_parts_update',
+            'inapp_new_order',
+            'inapp_order_created',
+            'inapp_order_status',
+            'inapp_order_tracking',
+            'inapp_status_changed',
+            'inapp_build_update',
+            'inapp_parts_update',
+            'inapp_new_booking',
+            'inapp_assignment',
+            'inapp_security_alert',
+            'inapp_slot_available',
+            'sms_new_booking',
+            'sms_new_inquiry',
+            'sms_assignment',
+            'sms_status_changed',
+        ];
+
+        $aliases = [
+            'emailNewBooking' => 'email_new_booking',
+            'emailNewOrder' => 'email_new_order',
+            'emailOrderCreated' => 'email_order_created',
+            'emailOrderStatus' => 'email_order_status',
+            'emailOrderTracking' => 'email_order_tracking',
+            'emailStatusChanged' => 'email_status_changed',
+            'emailBuildUpdate' => 'email_build_update',
+            'emailPartsUpdate' => 'email_parts_update',
+            'inappNewOrder' => 'inapp_new_order',
+            'inappOrderCreated' => 'inapp_order_created',
+            'inappOrderStatus' => 'inapp_order_status',
+            'inappOrderTracking' => 'inapp_order_tracking',
+            'inappStatusChanged' => 'inapp_status_changed',
+            'inappBuildUpdate' => 'inapp_build_update',
+            'inappPartsUpdate' => 'inapp_parts_update',
+            'inappNewBooking' => 'inapp_new_booking',
+            'inappAssignment' => 'inapp_assignment',
+            'inappSecurityAlert' => 'inapp_security_alert',
+            'inappSlotAvailable' => 'inapp_slot_available',
+            'smsNewBooking' => 'sms_new_booking',
+            'smsNewInquiry' => 'sms_new_inquiry',
+            'smsAssignment' => 'sms_assignment',
+            'smsStatusChanged' => 'sms_status_changed',
+        ];
+
+        foreach ($aliases as $from => $to) {
+            if (array_key_exists($from, $data) && ! array_key_exists($to, $data)) {
+                $data[$to] = $data[$from];
+            }
+        }
+
+        $updates = [];
+        foreach ($allowed as $col) {
+            if (array_key_exists($col, $data)) {
+                $updates[$col] = $data[$col] ? 1 : 0;
+            }
+        }
+
+        if (! empty($updates)) {
+            DB::table('notification_preferences')->where('user_id', $userId)->update($updates);
+        }
+
+        return $this->getForUser($userId);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Convenience checkers used by notification dispatch code
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function emailEnabled(int $userId, string $type): bool
+    {
+        $col = 'email_'.$type;
+
+        return $this->getColumnValue($userId, $col);
+    }
+
+    public function inappEnabled(int $userId, string $type): bool
+    {
+        $col = 'inapp_'.$type;
+
+        return $this->getColumnValue($userId, $col);
+    }
+
+    public function smsEnabled(int $userId, string $type): bool
+    {
+        $col = 'sms_'.$type;
+
+        return $this->getColumnValue($userId, $col);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private function getColumnValue(int $userId, string $col): bool
+    {
+        $allowed = [
+            'email_new_booking', 'email_new_order', 'email_order_created', 'email_order_status', 'email_order_tracking',
+            'email_status_changed', 'email_build_update', 'email_parts_update',
+            'inapp_new_order', 'inapp_order_created', 'inapp_order_status', 'inapp_order_tracking',
+            'inapp_status_changed', 'inapp_build_update', 'inapp_parts_update',
+            'inapp_new_booking', 'inapp_assignment', 'inapp_security_alert', 'inapp_slot_available',
+            'sms_new_booking', 'sms_new_inquiry', 'sms_assignment', 'sms_status_changed',
+        ];
+        if (! in_array($col, $allowed, true)) {
+            return true; // default on for unknown types
+        }
+        $row = (array) $this->fetchRow($userId);
+        if (empty($row)) {
+            return true; // no row → defaults are all on
+        }
+
+        return (bool) ($row[$col] ?? 1);
+    }
+
+    private function fetchRow(int $userId): ?object
+    {
+        return DB::table('notification_preferences')->where('user_id', $userId)->first();
+    }
+
+    private function ensureRow(int $userId): void
+    {
+        DB::table('notification_preferences')->insertOrIgnore(['user_id' => $userId]);
+    }
+
+    /** @param array<string, mixed> $row */
+    private function format(array $row): array
+    {
+        return [
+            'emailNewBooking' => (bool) ($row['email_new_booking'] ?? 1),
+            'emailNewOrder' => (bool) ($row['email_new_order'] ?? 1),
+            'emailOrderCreated' => (bool) ($row['email_order_created'] ?? 1),
+            'emailOrderStatus' => (bool) ($row['email_order_status'] ?? 1),
+            'emailOrderTracking' => (bool) ($row['email_order_tracking'] ?? 1),
+            'emailStatusChanged' => (bool) ($row['email_status_changed'] ?? 1),
+            'emailBuildUpdate' => (bool) ($row['email_build_update'] ?? 1),
+            'emailPartsUpdate' => (bool) ($row['email_parts_update'] ?? 1),
+            'inappNewOrder' => (bool) ($row['inapp_new_order'] ?? 1),
+            'inappOrderCreated' => (bool) ($row['inapp_order_created'] ?? 1),
+            'inappOrderStatus' => (bool) ($row['inapp_order_status'] ?? 1),
+            'inappOrderTracking' => (bool) ($row['inapp_order_tracking'] ?? 1),
+            'inappStatusChanged' => (bool) ($row['inapp_status_changed'] ?? 1),
+            'inappBuildUpdate' => (bool) ($row['inapp_build_update'] ?? 1),
+            'inappPartsUpdate' => (bool) ($row['inapp_parts_update'] ?? 1),
+            'inappNewBooking' => (bool) ($row['inapp_new_booking'] ?? 1),
+            'inappAssignment' => (bool) ($row['inapp_assignment'] ?? 1),
+            'inappSecurityAlert' => (bool) ($row['inapp_security_alert'] ?? 1),
+            'inappSlotAvailable' => (bool) ($row['inapp_slot_available'] ?? 1),
+            'smsNewBooking' => (bool) ($row['sms_new_booking'] ?? 1),
+            'smsNewInquiry' => (bool) ($row['sms_new_inquiry'] ?? 1),
+            'smsAssignment' => (bool) ($row['sms_assignment'] ?? 1),
+            'smsStatusChanged' => (bool) ($row['sms_status_changed'] ?? 1),
+        ];
     }
 }
