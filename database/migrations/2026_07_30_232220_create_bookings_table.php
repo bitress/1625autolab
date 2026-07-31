@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->uuid('id')->primary()->comment('UUID v4');
-            $table->integer('user_id')->unsigned()->nullable();
+            $table->unsignedInteger('user_id')->nullable();
             $table->string('name', 200);
             $table->string('email', 255);
             $table->string('phone', 30);
