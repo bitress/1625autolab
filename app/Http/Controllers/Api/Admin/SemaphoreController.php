@@ -20,9 +20,7 @@ class SemaphoreController extends Controller
             $account = $this->semaphoreService->getAccount($refresh);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Semaphore account details retrieved.',
-                'data' => ['account' => $account],
+                'account' => $account,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -41,9 +39,7 @@ class SemaphoreController extends Controller
             $messages = $this->semaphoreService->getMessages($filters, $refresh);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Semaphore messages retrieved.',
-                'data' => ['messages' => $messages],
+                'messages' => $messages,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

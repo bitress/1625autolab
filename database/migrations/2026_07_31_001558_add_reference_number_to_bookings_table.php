@@ -19,7 +19,7 @@ return new class extends Migration
         // Use PHP to generate reference numbers for SQLite compatibility
         $bookings = DB::table('bookings')->whereNull('reference_number')->orWhere('reference_number', '')->get();
         foreach ($bookings as $booking) {
-            $ref = 'BK-LEG-' . strtoupper(substr(str_replace('-', '', $booking->id), 0, 10));
+            $ref = 'BK-LEG-'.strtoupper(substr(str_replace('-', '', $booking->id), 0, 10));
             DB::table('bookings')->where('id', $booking->id)->update(['reference_number' => $ref]);
         }
 

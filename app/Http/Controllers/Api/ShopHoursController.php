@@ -17,9 +17,7 @@ class ShopHoursController extends Controller
         $hours = $this->shopHoursService->getAll();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Shop hours retrieved.',
-            'data' => ['hours' => $hours],
+            'hours' => $hours,
         ]);
     }
 
@@ -29,9 +27,7 @@ class ShopHoursController extends Controller
             $hours = $this->shopHoursService->updateAll($request->input('hours', []));
 
             return response()->json([
-                'success' => true,
-                'message' => 'Shop hours updated.',
-                'data' => ['hours' => $hours],
+                'hours' => $hours,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -46,9 +42,7 @@ class ShopHoursController extends Controller
         $dates = $this->shopHoursService->getClosedDates();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Closed dates retrieved.',
-            'data' => ['dates' => $dates],
+            'dates' => $dates,
         ]);
     }
 

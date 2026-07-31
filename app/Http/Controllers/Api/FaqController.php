@@ -21,9 +21,7 @@ class FaqController extends Controller
         $faqs = $this->faqService->getAll($activeOnly);
 
         return response()->json([
-            'success' => true,
-            'message' => 'FAQs retrieved.',
-            'data' => ['faqs' => $faqs],
+            'faqs' => $faqs,
         ]);
     }
 
@@ -33,9 +31,7 @@ class FaqController extends Controller
             $faq = $this->faqService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'FAQ created.',
-                'data' => ['faq' => $faq],
+                'faq' => $faq,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -51,9 +47,7 @@ class FaqController extends Controller
             $faq = $this->faqService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'FAQ updated.',
-                'data' => ['faq' => $faq],
+                'faq' => $faq,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

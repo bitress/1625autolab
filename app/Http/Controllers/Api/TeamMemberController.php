@@ -21,9 +21,7 @@ class TeamMemberController extends Controller
         $members = $this->teamMemberService->getAll($activeOnly);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Team members retrieved.',
-            'data' => ['members' => $members],
+            'members' => $members,
         ]);
     }
 
@@ -33,9 +31,7 @@ class TeamMemberController extends Controller
             $member = $this->teamMemberService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Team member created.',
-                'data' => ['member' => $member],
+                'member' => $member,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -51,9 +47,7 @@ class TeamMemberController extends Controller
             $member = $this->teamMemberService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Team member updated.',
-                'data' => ['member' => $member],
+                'member' => $member,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

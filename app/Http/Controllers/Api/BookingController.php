@@ -31,9 +31,7 @@ class BookingController extends Controller
             $booking = $this->bookingService->create($request->validated(), $userId);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Booking created successfully.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -49,9 +47,7 @@ class BookingController extends Controller
         $bookings = $this->accessService->getAccessibleBookingsForPayload($payload);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Bookings retrieved.',
-            'data' => ['bookings' => $bookings],
+            'bookings' => $bookings,
         ]);
     }
 
@@ -60,9 +56,7 @@ class BookingController extends Controller
         $bookings = $this->bookingService->getByUserId($request->user()->id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Your bookings retrieved.',
-            'data' => ['bookings' => $bookings],
+            'bookings' => $bookings,
         ]);
     }
 
@@ -76,14 +70,10 @@ class BookingController extends Controller
             $counts = $this->bookingService->getSlotCounts($date);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Availability retrieved.',
-                'data' => [
-                    'date' => $date,
-                    'slots' => $slots,
-                    'capacity' => $capacity,
-                    'counts' => $counts,
-                ],
+                'date' => $date,
+                'slots' => $slots,
+                'capacity' => $capacity,
+                'counts' => $counts,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -106,9 +96,7 @@ class BookingController extends Controller
             }
 
             return response()->json([
-                'success' => true,
-                'message' => 'Booking retrieved.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -134,9 +122,7 @@ class BookingController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Booking status updated.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -162,9 +148,7 @@ class BookingController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Technician assigned.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -185,9 +169,7 @@ class BookingController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Booking rescheduled successfully.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -203,9 +185,7 @@ class BookingController extends Controller
             $booking = $this->bookingService->cancelByUser($id, $request->user()->id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Booking cancelled.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -230,9 +210,7 @@ class BookingController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Internal notes updated.',
-                'data' => ['booking' => $booking],
+                'booking' => $booking,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -251,9 +229,7 @@ class BookingController extends Controller
             $activities = $this->activityService->getForBooking($id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Activity log retrieved.',
-                'data' => ['activities' => $activities],
+                'activities' => $activities,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

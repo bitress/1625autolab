@@ -22,9 +22,7 @@ class ReviewController extends Controller
         $reviews = $this->reviewService->getPublished($serviceId);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Reviews retrieved.',
-            'data' => ['reviews' => $reviews],
+            'reviews' => $reviews,
         ]);
     }
 
@@ -33,9 +31,7 @@ class ReviewController extends Controller
         $review = $this->reviewService->getForBooking($bookingId);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Review retrieved.',
-            'data' => ['review' => $review],
+            'review' => $review,
         ]);
     }
 
@@ -47,9 +43,7 @@ class ReviewController extends Controller
             $review = $this->reviewService->create($bookingId, $request->user()->id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Review submitted successfully. Pending approval.',
-                'data' => ['review' => $review],
+                'review' => $review,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -64,9 +58,7 @@ class ReviewController extends Controller
         $reviews = $this->reviewService->getAll();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Reviews retrieved.',
-            'data' => ['reviews' => $reviews],
+            'reviews' => $reviews,
         ]);
     }
 

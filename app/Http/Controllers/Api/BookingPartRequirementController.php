@@ -17,9 +17,7 @@ class BookingPartRequirementController extends Controller
         $requirements = $this->inventoryService->listBookingPartRequirements($bookingId);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Part requirements retrieved.',
-            'data' => ['requirements' => $requirements],
+            'requirements' => $requirements,
         ]);
     }
 
@@ -33,9 +31,7 @@ class BookingPartRequirementController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Part requirement created.',
-                'data' => ['requirement' => $requirement],
+                'requirement' => $requirement,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -55,9 +51,7 @@ class BookingPartRequirementController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Part requirement updated.',
-                'data' => ['requirement' => $requirement],
+                'requirement' => $requirement,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

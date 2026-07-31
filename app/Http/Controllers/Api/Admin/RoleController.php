@@ -21,9 +21,7 @@ class RoleController extends Controller
         $roles = $this->userService->listRoles();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Roles retrieved.',
-            'data' => ['roles' => $roles],
+            'roles' => $roles,
         ]);
     }
 
@@ -33,9 +31,7 @@ class RoleController extends Controller
         $logs = $this->userService->listRoleAuditLogs($limit);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Role audit logs retrieved.',
-            'data' => ['logs' => $logs],
+            'logs' => $logs,
         ]);
     }
 
@@ -52,9 +48,7 @@ class RoleController extends Controller
             $this->permissionService->flushCache();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Role created.',
-                'data' => ['role' => $role],
+                'role' => $role,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -78,9 +72,7 @@ class RoleController extends Controller
             $this->permissionService->flushCache();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Role updated.',
-                'data' => ['role' => $role],
+                'role' => $role,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

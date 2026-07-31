@@ -21,9 +21,7 @@ class ProductController extends Controller
         $products = $this->productService->getAll($includeInactive);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Products retrieved.',
-            'data' => ['products' => $products],
+            'products' => $products,
         ]);
     }
 
@@ -37,9 +35,7 @@ class ProductController extends Controller
             $product = $this->productService->getByIdentifier($id, $requireActive);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Product retrieved.',
-                'data' => ['product' => $product],
+                'product' => $product,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -55,9 +51,7 @@ class ProductController extends Controller
             $product = $this->productService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Product created.',
-                'data' => ['product' => $product],
+                'product' => $product,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -76,9 +70,7 @@ class ProductController extends Controller
             $product = $this->productService->update($numericId, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Product updated.',
-                'data' => ['product' => $product],
+                'product' => $product,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -113,9 +105,7 @@ class ProductController extends Controller
             $variation = $this->productService->createVariation($numericId, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Variation created.',
-                'data' => ['variation' => $variation],
+                'variation' => $variation,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -132,9 +122,7 @@ class ProductController extends Controller
             $variation = $this->productService->updateVariation($numericId, $variationId, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Variation updated.',
-                'data' => ['variation' => $variation],
+                'variation' => $variation,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

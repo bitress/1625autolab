@@ -18,9 +18,7 @@ class PostController extends Controller
             $posts = $this->facebookService->getPosts();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Posts retrieved.',
-                'data' => ['posts' => $posts],
+                'posts' => $posts,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

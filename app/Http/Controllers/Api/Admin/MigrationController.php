@@ -17,11 +17,7 @@ class MigrationController extends Controller
             $output = Artisan::output();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Database migration completed successfully.',
-                'data' => [
-                    'details' => explode("\n", trim($output)),
-                ],
+                'details' => explode("\n", trim($output)),
             ]);
         } catch (\Throwable $e) {
             return response()->json([

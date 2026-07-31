@@ -21,9 +21,7 @@ class CronController extends Controller
             $output = Artisan::output();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Daily cron executed.',
-                'data' => ['output' => trim($output)],
+                'output' => trim($output),
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -42,9 +40,7 @@ class CronController extends Controller
             $output = Artisan::output();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Queue processing executed.',
-                'data' => ['output' => trim($output)],
+                'output' => trim($output),
             ]);
         } catch (\Throwable $e) {
             return response()->json([

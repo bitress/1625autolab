@@ -13,7 +13,7 @@ return new class extends Migration
         $roles = DB::table('roles')->whereIn('role_key', ['admin', 'manager'])->get();
         foreach ($roles as $role) {
             $permissions = json_decode($role->permissions_json, true) ?? [];
-            if (is_array($permissions) && !in_array('security:audit:view', $permissions)) {
+            if (is_array($permissions) && ! in_array('security:audit:view', $permissions)) {
                 $permissions[] = 'security:audit:view';
                 DB::table('roles')
                     ->where('id', $role->id)

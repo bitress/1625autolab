@@ -18,9 +18,7 @@ class OrderController extends Controller
             $order = $this->orderService->create($request->all(), $request->user()?->id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Order created successfully.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -35,9 +33,7 @@ class OrderController extends Controller
         $orders = $this->orderService->listMine($request->user()->id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Your orders retrieved.',
-            'data' => ['orders' => $orders],
+            'orders' => $orders,
         ]);
     }
 
@@ -54,9 +50,7 @@ class OrderController extends Controller
             $order = $this->orderService->getById($id, $userId, ! $isAdmin);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Order retrieved.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -87,9 +81,7 @@ class OrderController extends Controller
             $order = $this->orderService->updateStatus($id, (string) $request->input('status'));
 
             return response()->json([
-                'success' => true,
-                'message' => 'Order status updated.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -109,9 +101,7 @@ class OrderController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Order tracking updated.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -127,9 +117,7 @@ class OrderController extends Controller
             $order = $this->orderService->updatePaymentStatus($id, (string) $request->input('paymentStatus'));
 
             return response()->json([
-                'success' => true,
-                'message' => 'Order payment status updated.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

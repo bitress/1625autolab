@@ -21,9 +21,7 @@ class TestimonialController extends Controller
         $testimonials = $this->testimonialService->getAll($activeOnly);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Testimonials retrieved.',
-            'data' => ['testimonials' => $testimonials],
+            'testimonials' => $testimonials,
         ]);
     }
 
@@ -33,9 +31,7 @@ class TestimonialController extends Controller
             $testimonial = $this->testimonialService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Testimonial created.',
-                'data' => ['testimonial' => $testimonial],
+                'testimonial' => $testimonial,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -51,9 +47,7 @@ class TestimonialController extends Controller
             $testimonial = $this->testimonialService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Testimonial updated.',
-                'data' => ['testimonial' => $testimonial],
+                'testimonial' => $testimonial,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

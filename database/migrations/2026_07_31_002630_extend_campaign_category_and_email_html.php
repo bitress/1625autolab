@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (\Illuminate\Support\Facades\Schema::hasTable('marketing_campaigns')) {
+        if (Schema::hasTable('marketing_campaigns')) {
             Schema::table('marketing_campaigns', function (Blueprint $table) {
                 $table->string('category', 120)->nullable()->default(null)->after('name');
                 $table->mediumText('message_html')->nullable()->after('message');

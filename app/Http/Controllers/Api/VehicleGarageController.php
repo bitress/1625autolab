@@ -21,9 +21,7 @@ class VehicleGarageController extends Controller
         $vehicles = $this->vehicleCrud->getByUserId($request->user()->id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Garage retrieved.',
-            'data' => ['vehicles' => $vehicles],
+            'vehicles' => $vehicles,
         ]);
     }
 
@@ -33,9 +31,7 @@ class VehicleGarageController extends Controller
             $vehicle = $this->vehicleCrud->create($request->user()->id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Vehicle added to garage.',
-                'data' => ['vehicle' => $vehicle],
+                'vehicle' => $vehicle,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -51,9 +47,7 @@ class VehicleGarageController extends Controller
             $vehicle = $this->vehicleCrud->update($id, $request->user()->id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Vehicle updated.',
-                'data' => ['vehicle' => $vehicle],
+                'vehicle' => $vehicle,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -101,9 +95,7 @@ class VehicleGarageController extends Controller
             $vehicle = $this->vehicleCrud->update($id, $request->user()->id, ['photo_url' => $url]);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Photo uploaded.',
-                'data' => ['vehicle' => $vehicle],
+                'vehicle' => $vehicle,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

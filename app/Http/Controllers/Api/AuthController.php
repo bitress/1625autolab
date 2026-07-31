@@ -33,19 +33,25 @@ class AuthController extends Controller
         try {
             $result = $this->userService->login($request->email, $request->password);
 
-            $this->securityService->onLoginSuccess(
-                $result['user'],
+            $this->securityService->recordLoginAttempt(
+                $request->email,
+                true,
+                $result['user']['id'] ?? null,
                 $request->ip() ?? '',
-                $request->userAgent() ?? ''
+                $request->userAgent() ?? '',
+                'Login successful.'
             );
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Logged in successfully.',
-                'data' => $result,
-            ]);
+            return response()->json($result);
         } catch (\Throwable $e) {
-            $this->securityService->onLoginFailure($request->email, $request->ip() ?? '');
+            $this->securityService->recordLoginAttempt(
+                $request->email,
+                false,
+                null,
+                $request->ip() ?? '',
+                $request->userAgent() ?? '',
+                $e->getMessage()
+            );
 
             return response()->json([
                 'success' => false,
@@ -61,11 +67,7 @@ class AuthController extends Controller
         try {
             $result = $this->userService->register($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful.',
-                'data' => $result,
-            ], 201);
+            return response()->json($result, 201);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -91,11 +93,7 @@ class AuthController extends Controller
     {
         // $request->user() is a Laravel model, but we convert to array for consistency with our services
         return response()->json([
-            'success' => true,
-            'message' => 'Profile retrieved.',
-            'data' => [
-                'user' => $request->user()->toArray(),
-            ],
+            'user' => $request->user()->toArray(),
         ]);
     }
 
@@ -108,12 +106,8 @@ class AuthController extends Controller
         $newToken = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'message' => 'Token refreshed.',
-            'data' => [
-                'token' => $newToken,
-                'user' => $user->toArray(),
-            ],
+            'token' => $newToken,
+            'user' => $user->toArray(),
         ]);
     }
 
@@ -123,11 +117,7 @@ class AuthController extends Controller
             $updatedUser = $this->userService->updateProfile($request->user()->id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Profile updated successfully.',
-                'data' => [
-                    'user' => $updatedUser,
-                ],
+                'user' => $updatedUser,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -167,9 +157,7 @@ class AuthController extends Controller
             $user = $this->userService->verifyEmail($request->query('token', ''));
 
             return response()->json([
-                'success' => true,
-                'message' => 'Email verified successfully.',
-                'data' => ['user' => $user],
+                'user' => $user,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -237,9 +225,7 @@ class AuthController extends Controller
         $prefs = $this->notificationPrefs->getForUser($request->user()->id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Preferences retrieved.',
-            'data' => ['preferences' => $prefs],
+            'preferences' => $prefs,
         ]);
     }
 
@@ -248,9 +234,7 @@ class AuthController extends Controller
         $prefs = $this->notificationPrefs->save($request->user()->id, $request->all());
 
         return response()->json([
-            'success' => true,
-            'message' => 'Preferences saved.',
-            'data' => ['preferences' => $prefs],
+            'preferences' => $prefs,
         ]);
     }
 }

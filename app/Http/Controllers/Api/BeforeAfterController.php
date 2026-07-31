@@ -24,9 +24,7 @@ class BeforeAfterController extends Controller
         $records = $this->beforeAfterService->getAll($includeInactive, (string) $make, (string) $model);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Before/after records retrieved.',
-            'data' => ['records' => $records],
+            'records' => $records,
         ]);
     }
 
@@ -40,9 +38,7 @@ class BeforeAfterController extends Controller
             $record = $this->beforeAfterService->getById($id, $requireActive);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Before/after record retrieved.',
-                'data' => ['record' => $record],
+                'record' => $record,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -58,9 +54,7 @@ class BeforeAfterController extends Controller
             $record = $this->beforeAfterService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Before/after record created.',
-                'data' => ['record' => $record],
+                'record' => $record,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -76,9 +70,7 @@ class BeforeAfterController extends Controller
             $record = $this->beforeAfterService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Before/after record updated.',
-                'data' => ['record' => $record],
+                'record' => $record,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

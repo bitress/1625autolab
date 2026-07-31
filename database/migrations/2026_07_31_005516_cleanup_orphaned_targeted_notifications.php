@@ -12,7 +12,7 @@ return new class extends Migration
     {
         // Re-backfill user_id from legacy payload marker if available.
         $notifications = DB::table('notifications')
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('user_id')->orWhere('user_id', 0);
             })
             ->whereNotNull('data')
@@ -38,19 +38,19 @@ return new class extends Migration
             'order_status',
             'order_tracking',
             'slot_available',
-            'assignment'
+            'assignment',
         ];
 
         $remainingNotifications = DB::table('notifications')
             ->whereIn('type', $targetedTypes)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('user_id')->orWhere('user_id', 0);
             })
             ->get();
 
         foreach ($remainingNotifications as $n) {
             $data = json_decode($n->data, true);
-            if (empty($data) || !is_array($data) || empty($data['_targetUserId']) || (int) $data['_targetUserId'] === 0) {
+            if (empty($data) || ! is_array($data) || empty($data['_targetUserId']) || (int) $data['_targetUserId'] === 0) {
                 DB::table('notifications')->where('id', $n->id)->delete();
             }
         }

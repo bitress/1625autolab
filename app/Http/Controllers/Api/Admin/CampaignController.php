@@ -17,9 +17,7 @@ class CampaignController extends Controller
         $campaigns = $this->campaignService->listCampaigns();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Campaigns retrieved.',
-            'data' => ['campaigns' => $campaigns],
+            'campaigns' => $campaigns,
         ]);
     }
 
@@ -29,9 +27,7 @@ class CampaignController extends Controller
             $campaign = $this->campaignService->getCampaign($id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Campaign retrieved.',
-                'data' => ['campaign' => $campaign],
+                'campaign' => $campaign,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -50,9 +46,7 @@ class CampaignController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Campaign created.',
-                'data' => ['campaign' => $campaign],
+                'campaign' => $campaign,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -68,9 +62,7 @@ class CampaignController extends Controller
             $campaign = $this->campaignService->updateCampaign($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Campaign updated.',
-                'data' => ['campaign' => $campaign],
+                'campaign' => $campaign,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -139,9 +131,7 @@ class CampaignController extends Controller
             $analytics = $this->campaignService->analytics($id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Campaign analytics retrieved.',
-                'data' => ['analytics' => $analytics],
+                'analytics' => $analytics,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -159,9 +149,7 @@ class CampaignController extends Controller
             $audience = $this->campaignService->getAudience($type);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Audience retrieved.',
-                'data' => ['audience' => $audience],
+                'audience' => $audience,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

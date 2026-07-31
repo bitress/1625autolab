@@ -25,9 +25,7 @@ class BuildUpdateController extends Controller
         $updates = $this->buildUpdateService->getByBookingId($bookingId);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Build updates retrieved.',
-            'data' => ['updates' => $updates],
+            'updates' => $updates,
         ]);
     }
 
@@ -48,9 +46,7 @@ class BuildUpdateController extends Controller
             $update = $this->buildUpdateService->create($bookingId, $note, $photoUrls);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Build update posted.',
-                'data' => ['update' => $update],
+                'update' => $update,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([

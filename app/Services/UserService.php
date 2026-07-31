@@ -64,7 +64,7 @@ class UserService
     public function register(array $data): array
     {
         $email = strtolower(trim((string) $data['email']));
-        $phone = self::normalizePhoneForStorage((string) ($data['phone'] ?? ''));
+        $phone = $this->normalizePhoneForStorage((string) ($data['phone'] ?? ''));
 
         // Validation handled by Form Request (RegisterRequest) prior to this call
 

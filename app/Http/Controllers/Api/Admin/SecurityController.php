@@ -19,9 +19,7 @@ class SecurityController extends Controller
         $logs = $this->securityService->listAuthAuditLogs($limit);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Security audit logs retrieved.',
-            'data' => ['logs' => $logs],
+            'logs' => $logs,
         ]);
     }
 

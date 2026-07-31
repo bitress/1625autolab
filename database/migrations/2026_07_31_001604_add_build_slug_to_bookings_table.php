@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -20,9 +21,9 @@ return new class extends Migration
             ->where('status', 'completed')
             ->whereNotNull('reference_number')
             ->where('reference_number', '!=', '')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('build_slug')
-                      ->orWhere('build_slug', '');
+                    ->orWhere('build_slug', '');
             })
             ->get();
 
@@ -31,14 +32,14 @@ return new class extends Migration
             $portfolio = DB::table('portfolio')
                 ->where('is_active', 1)
                 ->where(function ($query) use ($ref) {
-                    $query->whereRaw("LOWER(COALESCE(title, '') || ' ' || COALESCE(description, '')) LIKE ?", ['%' . $ref . '%']);
+                    $query->whereRaw("LOWER(COALESCE(title, '') || ' ' || COALESCE(description, '')) LIKE ?", ['%'.$ref.'%']);
                 })
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->first();
 
-            if ($portfolio && !empty($portfolio->title)) {
-                $slug = \Illuminate\Support\Str::slug($portfolio->title);
+            if ($portfolio && ! empty($portfolio->title)) {
+                $slug = Str::slug($portfolio->title);
                 DB::table('bookings')->where('id', $b->id)->update(['build_slug' => $slug]);
             }
         }

@@ -27,9 +27,7 @@ class InquiryController extends Controller
             $inquiry = $this->inquiryService->create($request->validated());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Inquiry submitted successfully. We will get back to you shortly.',
-                'data' => ['inquiry' => $inquiry],
+                'inquiry' => $inquiry,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -44,9 +42,7 @@ class InquiryController extends Controller
         $inquiries = $this->inquiryService->getAll();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Inquiries retrieved.',
-            'data' => ['inquiries' => $inquiries],
+            'inquiries' => $inquiries,
         ]);
     }
 
@@ -62,9 +58,7 @@ class InquiryController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Inquiry retrieved.',
-            'data' => ['inquiry' => $inquiry],
+            'inquiry' => $inquiry,
         ]);
     }
 
@@ -80,9 +74,7 @@ class InquiryController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Inquiry updated successfully.',
-                'data' => ['inquiry' => $inquiry],
+                'inquiry' => $inquiry,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -115,9 +107,7 @@ class InquiryController extends Controller
             $activities = $this->activityService->getForInquiry($id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Activity retrieved.',
-                'data' => ['activities' => $activities],
+                'activities' => $activities,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

@@ -21,12 +21,8 @@ class NotificationController extends Controller
         $unreadCount = $this->notificationService->getUnreadCount($isAdmin, $request->user()->id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Notifications retrieved.',
-            'data' => [
-                'notifications' => $notifications,
-                'unreadCount' => $unreadCount,
-            ],
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount,
         ]);
     }
 

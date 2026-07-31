@@ -18,9 +18,7 @@ class UserController extends Controller
         $users = $this->userService->listUsers($filters);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Users retrieved.',
-            'data' => ['users' => $users],
+            'users' => $users,
         ]);
     }
 
@@ -31,9 +29,7 @@ class UserController extends Controller
         $users = $this->userService->listUsers($filters);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Assignable users retrieved.',
-            'data' => ['users' => $users],
+            'users' => $users,
         ]);
     }
 
@@ -43,9 +39,7 @@ class UserController extends Controller
             $user = $this->userService->createByAdmin($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'User created.',
-                'data' => ['user' => $user],
+                'user' => $user,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -66,9 +60,7 @@ class UserController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Role updated.',
-                'data' => ['user' => $user],
+                'user' => $user,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -87,9 +79,7 @@ class UserController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'User status updated.',
-                'data' => ['user' => $user],
+                'user' => $user,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -105,9 +95,7 @@ class UserController extends Controller
             $user = $this->userService->updateUserInfo($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'User info updated.',
-                'data' => ['user' => $user],
+                'user' => $user,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

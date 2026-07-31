@@ -21,9 +21,7 @@ class OfferController extends Controller
         $offers = $this->offerService->getAll($includeInactive);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Offers retrieved.',
-            'data' => ['offers' => $offers],
+            'offers' => $offers,
         ]);
     }
 
@@ -37,9 +35,7 @@ class OfferController extends Controller
             $offer = $this->offerService->getById($id, $requireActive);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Offer retrieved.',
-                'data' => ['offer' => $offer],
+                'offer' => $offer,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -55,9 +51,7 @@ class OfferController extends Controller
             $offer = $this->offerService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Offer created.',
-                'data' => ['offer' => $offer],
+                'offer' => $offer,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -73,9 +67,7 @@ class OfferController extends Controller
             $offer = $this->offerService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Offer updated.',
-                'data' => ['offer' => $offer],
+                'offer' => $offer,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

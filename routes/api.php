@@ -61,77 +61,78 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
-Route::post('/auth/verify-email', [AuthController::class, 'verifyEmail']);
+Route::get('/auth/verify-email', [AuthController::class, 'verifyEmail']);
 
-Route::post('/booking/create', [BookingController::class, 'create']);
-Route::get('/booking/availability', [BookingController::class, 'availability']);
+Route::post('/bookings', [BookingController::class, 'create']);
+Route::get('/bookings/availability', [BookingController::class, 'availability']);
 
-Route::post('/inquiry/create', [InquiryController::class, 'create']);
+Route::post('/inquiries', [InquiryController::class, 'create']);
 
-Route::get('/build-updates/list', [BuildUpdateController::class, 'list']);
+Route::get('/bookings/{id}/build-updates', [BuildUpdateController::class, 'list']);
 
 Route::get('/reviews/published', [ReviewController::class, 'publishedList']);
-Route::get('/reviews/booking/{bookingId}', [ReviewController::class, 'getForBooking']);
+Route::get('/bookings/{id}/review', [ReviewController::class, 'getForBooking']);
 
-Route::post('/contact/send', [ContactController::class, 'send']);
+Route::post('/contact', [ContactController::class, 'send']);
 
 Route::get('/vehicles/makes', [VehicleController::class, 'makes']);
 Route::get('/vehicles/models', [VehicleController::class, 'models']);
 Route::get('/vehicles/trims', [VehicleController::class, 'trims']);
 
-Route::post('/waitlist/join', [WaitlistController::class, 'join']);
-Route::get('/waitlist/claim', [WaitlistController::class, 'claimGet']);
+Route::post('/waitlist', [WaitlistController::class, 'join']);
+Route::get('/waitlist/claim/{token}', [WaitlistController::class, 'claimGet']);
 
 Route::get('/manychat/menu', [ManyChatController::class, 'menu']);
-Route::get('/manychat/drill-down', [ManyChatController::class, 'drillDown']);
+Route::post('/manychat/variants', [ManyChatController::class, 'drillDown']); // Matches snippet 'getManyChatDrillDown'
 
-Route::get('/fb/posts', [PostController::class, 'index']);
+Route::get('/posts', [PostController::class, 'index']); // from '/fb/posts' wait, snippet has /api/posts
 
 // Public read-only for settings/misc
-Route::get('/shop-hours', [ShopHoursController::class, 'get']);
-Route::get('/shop-hours/closed-dates', [ShopHoursController::class, 'closedDatesGet']);
-Route::get('/settings', [SiteSettingsController::class, 'get']);
-Route::get('/portfolio/categories', [PortfolioCategoryController::class, 'list']);
-Route::get('/portfolio/categories/{id}', [PortfolioCategoryController::class, 'get']);
+Route::get('/shop/hours', [ShopHoursController::class, 'get']);
+Route::get('/shop/closed-dates', [ShopHoursController::class, 'closedDatesGet']);
+Route::get('/site-settings', [SiteSettingsController::class, 'get']);
+Route::get('/portfolio-categories', [PortfolioCategoryController::class, 'list']);
+Route::get('/portfolio-categories/{id}', [PortfolioCategoryController::class, 'get']);
 
 // Admin backdoor (should ideally be protected, keeping public for dev/migration parity)
 Route::post('/admin/cron/daily', [CronController::class, 'daily']);
 Route::post('/admin/cron/process-queue', [CronController::class, 'processQueue']);
-Route::post('/admin/migration/up', [MigrationController::class, 'up']);
+Route::post('/admin/migrate', [MigrationController::class, 'up']);
+Route::get('/admin/migrate', [MigrationController::class, 'status']);
 
 //
 // Routes that can optionally use auth payload (e.g. to show drafts if admin)
 //
-Route::middleware(['optional_auth'])->group(function () {
-    Route::get('/booking/list', [BookingController::class, 'list']);
-    Route::get('/booking/get/{id}', [BookingController::class, 'get']);
+Route::middleware(['optional.auth'])->group(function () {
+    Route::get('/bookings', [BookingController::class, 'list']);
+    Route::get('/bookings/{id}', [BookingController::class, 'get'])->where('id', '\d+');
 
-    Route::get('/services/list', [ServiceController::class, 'list']);
-    Route::get('/services/get/{id}', [ServiceController::class, 'get']);
+    Route::get('/services', [ServiceController::class, 'list']);
+    Route::get('/services/{id}', [ServiceController::class, 'get'])->where('id', '\d+');
     Route::get('/services/slug/{slug}', [ServiceController::class, 'getBySlug']);
 
-    Route::get('/products/list', [ProductController::class, 'list']);
-    Route::get('/products/get/{id}', [ProductController::class, 'get']);
+    Route::get('/products', [ProductController::class, 'list']);
+    Route::get('/products/{id}', [ProductController::class, 'get']);
 
-    Route::post('/orders/create', [OrderController::class, 'create']);
-    Route::get('/orders/get/{id}', [OrderController::class, 'get']);
+    Route::post('/orders', [OrderController::class, 'create']);
+    Route::get('/orders/{id}', [OrderController::class, 'get'])->where('id', '\d+');
 
-    Route::get('/posts/list', [BlogController::class, 'list']);
-    Route::get('/posts/get/{id}', [BlogController::class, 'get']);
+    Route::get('/blog', [BlogController::class, 'list']);
+    Route::get('/blog/{id}', [BlogController::class, 'get'])->where('id', '\d+');
 
-    Route::get('/portfolio/list', [PortfolioController::class, 'list']);
-    Route::get('/portfolio/get/{id}', [PortfolioController::class, 'get']);
+    Route::get('/portfolio', [PortfolioController::class, 'list']);
+    Route::get('/portfolio/{id}', [PortfolioController::class, 'get'])->where('id', '\d+');
     Route::get('/portfolio/slug/{slug}', [PortfolioController::class, 'getBySlug']);
 
-    Route::get('/team/list', [TeamMemberController::class, 'list']);
-    Route::get('/testimonials/list', [TestimonialController::class, 'list']);
-    Route::get('/faqs/list', [FaqController::class, 'list']);
+    Route::get('/team-members', [TeamMemberController::class, 'list']);
+    Route::get('/testimonials', [TestimonialController::class, 'list']);
+    Route::get('/faq', [FaqController::class, 'list']);
 
-    Route::get('/offers/list', [OfferController::class, 'list']);
-    Route::get('/offers/get/{id}', [OfferController::class, 'get']);
+    Route::get('/offers', [OfferController::class, 'list']);
+    Route::get('/offers/{id}', [OfferController::class, 'get'])->where('id', '\d+');
 
-    Route::get('/before-after/list', [BeforeAfterController::class, 'list']);
-    Route::get('/before-after/get/{id}', [BeforeAfterController::class, 'get']);
+    Route::get('/before-after', [BeforeAfterController::class, 'list']);
+    Route::get('/before-after/{id}', [BeforeAfterController::class, 'get'])->where('id', '\d+');
 });
 
 //
@@ -144,178 +145,195 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
     Route::put('/auth/profile', [AuthController::class, 'profile']);
+    Route::post('/auth/avatar-upload', [AuthController::class, 'avatarUpload']); // Added based on snippet
     Route::post('/auth/resend-verification', [AuthController::class, 'resendVerification']);
     Route::get('/auth/data-export', [AuthController::class, 'dataExport']);
     Route::delete('/auth/account', [AuthController::class, 'accountDelete']);
-    Route::get('/auth/notification-prefs', [AuthController::class, 'notificationPrefsGet']);
-    Route::put('/auth/notification-prefs', [AuthController::class, 'notificationPrefsSave']);
+    Route::get('/auth/notification-preferences', [AuthController::class, 'notificationPrefsGet']);
+    Route::put('/auth/notification-preferences', [AuthController::class, 'notificationPrefsSave']);
+    Route::get('/auth/sessions', [AuthController::class, 'sessionList']); // Snippet
+    Route::delete('/auth/sessions/revoke-others', [AuthController::class, 'sessionRevokeOthers']); // Snippet
+    Route::delete('/auth/sessions/{id}', [AuthController::class, 'sessionRevoke'])->where('id', '\d+'); // Snippet
 
     // Customer specific stats
-    Route::get('/customer/stats', [CustomerController::class, 'stats']);
+    Route::get('/customers/{userId}/stats', [CustomerController::class, 'stats']);
 
     // Bookings
-    Route::get('/booking/mine', [BookingController::class, 'mine']);
-    Route::put('/booking/status/{id}', [BookingController::class, 'updateStatus']);
-    Route::put('/booking/assign-tech/{id}', [BookingController::class, 'assignTech']);
-    Route::put('/booking/reschedule/{id}', [BookingController::class, 'reschedule']);
-    Route::put('/booking/cancel/{id}', [BookingController::class, 'cancel']);
-    Route::put('/booking/internal-notes/{id}', [BookingController::class, 'internalNotes']);
-    Route::get('/booking/activity/{id}', [BookingController::class, 'activityList']);
+    Route::get('/bookings/mine', [BookingController::class, 'mine']);
+    // Update methods to match PATCH as per snippet
+    Route::patch('/bookings/{id}/assign-tech', [BookingController::class, 'assignTech']);
+    Route::patch('/bookings/{id}/reschedule', [BookingController::class, 'reschedule']);
+    Route::patch('/bookings/{id}/admin-reschedule', [BookingController::class, 'adminReschedule']); // Added based on snippet
+    Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel']);
+    Route::patch('/bookings/{id}/notes', [BookingController::class, 'internalNotes']);
+    Route::patch('/bookings/{id}/qa-photos', [BookingController::class, 'qaPhotosUpdate']); // Added based on snippet
+    Route::patch('/bookings/{id}/calibration', [BookingController::class, 'calibrationUpdate']); // Added based on snippet
+    Route::get('/bookings/{id}/activity', [BookingController::class, 'activityList']);
+    Route::patch('/bookings/{id}', [BookingController::class, 'update']);
+    Route::delete('/bookings/{id}', [BookingController::class, 'delete']);
 
     // Inquiries
-    Route::get('/inquiry/list', [InquiryController::class, 'list']);
-    Route::get('/inquiry/get/{id}', [InquiryController::class, 'get']);
-    Route::put('/inquiry/update/{id}', [InquiryController::class, 'update']);
-    Route::delete('/inquiry/delete/{id}', [InquiryController::class, 'delete']);
-    Route::get('/inquiry/activity/{id}', [InquiryController::class, 'activity']);
+    Route::get('/inquiries', [InquiryController::class, 'list']);
+    Route::get('/inquiries/mine', [InquiryController::class, 'mine']);
+    Route::get('/inquiries/calendar', [InquiryController::class, 'calendar']);
+    Route::get('/inquiries/availability', [InquiryController::class, 'availability']);
+    Route::get('/inquiries/{id}', [InquiryController::class, 'get']);
+    Route::patch('/inquiries/{id}', [InquiryController::class, 'update']);
+    Route::delete('/inquiries/{id}', [InquiryController::class, 'delete']);
+    Route::get('/inquiries/{id}/activity', [InquiryController::class, 'activity']);
 
     // Build Updates
-    Route::post('/build-updates/create', [BuildUpdateController::class, 'create']);
+    Route::post('/bookings/{id}/build-updates', [BuildUpdateController::class, 'create']);
+    Route::post('/bookings/{id}/build-updates/media', [BuildUpdateController::class, 'mediaUpload']);
 
     // Parts
-    Route::get('/booking/{bookingId}/parts', [BookingPartRequirementController::class, 'list']);
-    Route::post('/booking/{bookingId}/parts', [BookingPartRequirementController::class, 'create']);
-    Route::put('/booking/{bookingId}/parts/{reqId}', [BookingPartRequirementController::class, 'update']);
+    Route::get('/bookings/{id}/parts/requirements', [BookingPartRequirementController::class, 'list']);
+    Route::post('/bookings/{id}/parts/requirements', [BookingPartRequirementController::class, 'create']);
+    Route::patch('/bookings/{id}/parts/requirements/{rid}', [BookingPartRequirementController::class, 'update']);
+    Route::patch('/bookings/{id}/parts', [BookingPartRequirementController::class, 'partsUpdate']); // From handleBookingPartsUpdate
 
     // Reviews
-    Route::post('/reviews/booking/{bookingId}', [ReviewController::class, 'create']);
-    Route::get('/reviews/list', [ReviewController::class, 'list']);
-    Route::put('/reviews/approve/{id}', [ReviewController::class, 'approve']);
-    Route::put('/reviews/reject/{id}', [ReviewController::class, 'reject']);
-    Route::delete('/reviews/delete/{id}', [ReviewController::class, 'delete']);
+    Route::post('/bookings/{id}/review', [ReviewController::class, 'create']);
+    Route::get('/reviews', [ReviewController::class, 'list']);
+    Route::patch('/reviews/{id}/approve', [ReviewController::class, 'approve']);
+    Route::patch('/reviews/{id}/reject', [ReviewController::class, 'reject']);
+    Route::delete('/reviews/{id}', [ReviewController::class, 'delete']);
 
     // Notifications
-    Route::get('/notifications/list', [NotificationController::class, 'list']);
-    Route::put('/notifications/read/{id}', [NotificationController::class, 'read']);
-    Route::put('/notifications/read-all', [NotificationController::class, 'readAll']);
-    Route::delete('/notifications/delete/{id}', [NotificationController::class, 'delete']);
+    Route::get('/notifications', [NotificationController::class, 'list']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'read']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'readAll']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete']);
 
     // Garage
-    Route::get('/garage/list', [VehicleGarageController::class, 'list']);
-    Route::post('/garage/add', [VehicleGarageController::class, 'create']);
-    Route::put('/garage/update/{id}', [VehicleGarageController::class, 'update']);
-    Route::delete('/garage/remove/{id}', [VehicleGarageController::class, 'delete']);
-    Route::post('/garage/media/{id}', [VehicleGarageController::class, 'mediaUpload']);
+    Route::get('/client/vehicles', [VehicleGarageController::class, 'list']);
+    Route::post('/client/vehicles', [VehicleGarageController::class, 'create']);
+    Route::put('/client/vehicles/{id}', [VehicleGarageController::class, 'update'])->where('id', '\d+');
+    Route::delete('/client/vehicles/{id}', [VehicleGarageController::class, 'delete'])->where('id', '\d+');
+    Route::post('/client/vehicles/media', [VehicleGarageController::class, 'mediaUpload']);
 
     // Orders
     Route::get('/orders/mine', [OrderController::class, 'mine']);
-    Route::get('/orders/admin/list', [OrderController::class, 'adminList']);
-    Route::put('/orders/admin/status/{id}', [OrderController::class, 'adminStatusUpdate']);
-    Route::put('/orders/admin/tracking/{id}', [OrderController::class, 'adminTrackingUpdate']);
-    Route::put('/orders/admin/payment/{id}', [OrderController::class, 'adminPaymentUpdate']);
+    Route::get('/admin/orders', [OrderController::class, 'adminList']);
+    Route::patch('/admin/orders/{id}/status', [OrderController::class, 'adminStatusUpdate']);
+    Route::patch('/admin/orders/{id}/tracking', [OrderController::class, 'adminTrackingUpdate']);
+    Route::patch('/admin/orders/{id}/payment', [OrderController::class, 'adminPaymentUpdate']);
 
     // Waitlist
-    Route::get('/waitlist/list', [WaitlistController::class, 'list']);
-    Route::delete('/waitlist/remove/{id}', [WaitlistController::class, 'remove']);
+    Route::get('/waitlist', [WaitlistController::class, 'list']);
+    Route::delete('/waitlist/{id}', [WaitlistController::class, 'remove']);
 
     // Content Mutators
-    Route::post('/services/create', [ServiceController::class, 'create']);
-    Route::put('/services/update/{id}', [ServiceController::class, 'update']);
-    Route::delete('/services/delete/{id}', [ServiceController::class, 'delete']);
+    Route::post('/services', [ServiceController::class, 'create']);
+    Route::put('/services/{id}', [ServiceController::class, 'update'])->where('id', '\d+');
+    Route::delete('/services/{id}', [ServiceController::class, 'delete'])->where('id', '\d+');
+    Route::get('/services/{id}/variations', [ServiceController::class, 'variationList']); // Missing previously?
     Route::post('/services/{id}/variations', [ServiceController::class, 'variationCreate']);
-    Route::put('/services/{id}/variations/{varId}', [ServiceController::class, 'variationUpdate']);
-    Route::delete('/services/{id}/variations/{varId}', [ServiceController::class, 'variationDelete']);
+    Route::put('/services/{id}/variations/{vid}', [ServiceController::class, 'variationUpdate']);
+    Route::delete('/services/{id}/variations/{vid}', [ServiceController::class, 'variationDelete']);
 
-    Route::post('/products/create', [ProductController::class, 'create']);
-    Route::put('/products/update/{id}', [ProductController::class, 'update']);
-    Route::delete('/products/delete/{id}', [ProductController::class, 'delete']);
+    Route::post('/products', [ProductController::class, 'create']);
+    Route::put('/products/{id}', [ProductController::class, 'update']);
+    Route::delete('/products/{id}', [ProductController::class, 'delete']);
+    Route::get('/products/{id}/variations', [ProductController::class, 'variationList']); // Added
     Route::post('/products/{id}/variations', [ProductController::class, 'variationCreate']);
-    Route::put('/products/{id}/variations/{varId}', [ProductController::class, 'variationUpdate']);
-    Route::delete('/products/{id}/variations/{varId}', [ProductController::class, 'variationDelete']);
+    Route::put('/products/{id}/variations/{vid}', [ProductController::class, 'variationUpdate']);
+    Route::delete('/products/{id}/variations/{vid}', [ProductController::class, 'variationDelete']);
 
-    Route::post('/posts/create', [BlogController::class, 'create']);
-    Route::put('/posts/update/{id}', [BlogController::class, 'update']);
-    Route::delete('/posts/delete/{id}', [BlogController::class, 'delete']);
+    Route::post('/blog', [BlogController::class, 'create']);
+    Route::put('/blog/{id}', [BlogController::class, 'update'])->where('id', '\d+');
+    Route::delete('/blog/{id}', [BlogController::class, 'delete'])->where('id', '\d+');
 
-    Route::post('/portfolio/create', [PortfolioController::class, 'create']);
-    Route::put('/portfolio/update/{id}', [PortfolioController::class, 'update']);
-    Route::delete('/portfolio/delete/{id}', [PortfolioController::class, 'delete']);
+    Route::post('/portfolio', [PortfolioController::class, 'create']);
+    Route::put('/portfolio/{id}', [PortfolioController::class, 'update'])->where('id', '\d+');
+    Route::delete('/portfolio/{id}', [PortfolioController::class, 'delete'])->where('id', '\d+');
 
-    Route::post('/portfolio/categories', [PortfolioCategoryController::class, 'create']);
-    Route::put('/portfolio/categories/{id}', [PortfolioCategoryController::class, 'update']);
-    Route::delete('/portfolio/categories/{id}', [PortfolioCategoryController::class, 'delete']);
+    Route::post('/portfolio-categories', [PortfolioCategoryController::class, 'create']);
+    Route::put('/portfolio-categories/{id}', [PortfolioCategoryController::class, 'update'])->where('id', '\d+');
+    Route::delete('/portfolio-categories/{id}', [PortfolioCategoryController::class, 'delete'])->where('id', '\d+');
 
-    Route::put('/shop-hours', [ShopHoursController::class, 'update']);
-    Route::post('/shop-hours/closed-dates', [ShopHoursController::class, 'closedDatesAdd']);
-    Route::delete('/shop-hours/closed-dates/{date}', [ShopHoursController::class, 'closedDatesRemove']);
+    Route::put('/shop/hours', [ShopHoursController::class, 'update']);
+    Route::post('/shop/closed-dates', [ShopHoursController::class, 'closedDatesAdd']);
+    Route::delete('/shop/closed-dates/{date}', [ShopHoursController::class, 'closedDatesRemove']);
 
-    Route::put('/settings', [SiteSettingsController::class, 'update']);
+    Route::put('/site-settings', [SiteSettingsController::class, 'update']);
 
-    Route::post('/team/create', [TeamMemberController::class, 'create']);
-    Route::put('/team/update/{id}', [TeamMemberController::class, 'update']);
-    Route::delete('/team/delete/{id}', [TeamMemberController::class, 'delete']);
+    Route::post('/team-members', [TeamMemberController::class, 'create']);
+    Route::put('/team-members/{id}', [TeamMemberController::class, 'update'])->where('id', '\d+');
+    Route::delete('/team-members/{id}', [TeamMemberController::class, 'delete'])->where('id', '\d+');
 
-    Route::post('/testimonials/create', [TestimonialController::class, 'create']);
-    Route::put('/testimonials/update/{id}', [TestimonialController::class, 'update']);
-    Route::delete('/testimonials/delete/{id}', [TestimonialController::class, 'delete']);
+    Route::post('/testimonials', [TestimonialController::class, 'create']);
+    Route::put('/testimonials/{id}', [TestimonialController::class, 'update'])->where('id', '\d+');
+    Route::delete('/testimonials/{id}', [TestimonialController::class, 'delete'])->where('id', '\d+');
 
-    Route::post('/faqs/create', [FaqController::class, 'create']);
-    Route::put('/faqs/update/{id}', [FaqController::class, 'update']);
-    Route::delete('/faqs/delete/{id}', [FaqController::class, 'delete']);
+    Route::post('/faq', [FaqController::class, 'create']);
+    Route::put('/faq/{id}', [FaqController::class, 'update'])->where('id', '\d+');
+    Route::delete('/faq/{id}', [FaqController::class, 'delete'])->where('id', '\d+');
 
-    Route::post('/offers/create', [OfferController::class, 'create']);
-    Route::put('/offers/update/{id}', [OfferController::class, 'update']);
-    Route::delete('/offers/delete/{id}', [OfferController::class, 'delete']);
+    Route::post('/offers', [OfferController::class, 'create']);
+    Route::put('/offers/{id}', [OfferController::class, 'update'])->where('id', '\d+');
+    Route::delete('/offers/{id}', [OfferController::class, 'delete'])->where('id', '\d+');
 
-    Route::post('/before-after/create', [BeforeAfterController::class, 'create']);
-    Route::put('/before-after/update/{id}', [BeforeAfterController::class, 'update']);
-    Route::delete('/before-after/delete/{id}', [BeforeAfterController::class, 'delete']);
+    Route::post('/before-after', [BeforeAfterController::class, 'create']);
+    Route::put('/before-after/{id}', [BeforeAfterController::class, 'update'])->where('id', '\d+');
+    Route::delete('/before-after/{id}', [BeforeAfterController::class, 'delete'])->where('id', '\d+');
 
     // Admin Users
-    Route::get('/admin/users/list', [UserController::class, 'list']);
+    Route::get('/admin/users', [UserController::class, 'list']);
     Route::get('/admin/users/assignable', [UserController::class, 'assignable']);
-    Route::post('/admin/users/create', [UserController::class, 'create']);
-    Route::put('/admin/users/role/{id}', [UserController::class, 'roleUpdate']);
-    Route::put('/admin/users/status/{id}', [UserController::class, 'statusUpdate']);
-    Route::put('/admin/users/info/{id}', [UserController::class, 'infoUpdate']);
-    Route::delete('/admin/users/delete/{id}', [UserController::class, 'delete']);
+    Route::post('/admin/users', [UserController::class, 'create']);
+    Route::patch('/admin/users/{id}/role', [UserController::class, 'roleUpdate']);
+    Route::patch('/admin/users/{id}/status', [UserController::class, 'statusUpdate']);
+    Route::patch('/admin/users/{id}/info', [UserController::class, 'infoUpdate']);
+    Route::delete('/admin/users/{id}', [UserController::class, 'delete']);
 
     // Admin Clients
-    Route::get('/admin/clients/list', [ClientController::class, 'list']);
-    Route::get('/admin/clients/bookings/{id}', [ClientController::class, 'bookings']);
-    Route::get('/admin/clients/vehicles/{id}', [ClientController::class, 'vehicles']);
-    Route::get('/admin/clients/customer360/{id}', [ClientController::class, 'customer360']);
+    Route::get('/admin/clients', [ClientController::class, 'list']);
+    Route::get('/admin/clients/{id}/bookings', [ClientController::class, 'bookings']);
+    Route::get('/admin/clients/{id}/vehicles', [ClientController::class, 'vehicles']);
+    Route::get('/admin/customers/{id}/360', [ClientController::class, 'customer360']);
 
     // Admin Roles
-    Route::get('/admin/roles/list', [RoleController::class, 'list']);
+    Route::get('/admin/roles', [RoleController::class, 'list']);
     Route::get('/admin/roles/audit', [RoleController::class, 'auditList']);
-    Route::post('/admin/roles/create', [RoleController::class, 'create']);
-    Route::put('/admin/roles/update/{id}', [RoleController::class, 'update']);
-    Route::delete('/admin/roles/delete/{id}', [RoleController::class, 'delete']);
+    Route::post('/admin/roles', [RoleController::class, 'create']);
+    Route::put('/admin/roles/{id}', [RoleController::class, 'update']);
+    Route::delete('/admin/roles/{id}', [RoleController::class, 'delete']);
 
     // Admin Security
     Route::get('/admin/security/audit', [SecurityController::class, 'auditList']);
-    Route::get('/admin/security/export', [SecurityController::class, 'auditExport']);
+    Route::get('/admin/security/audit/export', [SecurityController::class, 'auditExport']);
 
     // Admin Activity Log
-    Route::get('/admin/activity/users', [ActivityLogController::class, 'users']);
-    Route::get('/admin/activity/list', [ActivityLogController::class, 'list']);
+    Route::get('/admin/activity-logs/users', [ActivityLogController::class, 'users']);
+    Route::get('/admin/activity-logs', [ActivityLogController::class, 'list']);
 
     // Admin Semaphore
     Route::get('/admin/semaphore/account', [SemaphoreController::class, 'account']);
     Route::get('/admin/semaphore/messages', [SemaphoreController::class, 'messages']);
 
     // Admin Notification Queue
-    Route::get('/admin/notification-queue/list', [NotificationQueueController::class, 'list']);
+    Route::get('/admin/notification-queue', [NotificationQueueController::class, 'list']);
     Route::get('/admin/notification-queue/health', [NotificationQueueController::class, 'health']);
-    Route::post('/admin/notification-queue/replay', [NotificationQueueController::class, 'replayFailed']);
-    Route::post('/admin/notification-queue/replay/{id}', [NotificationQueueController::class, 'replayOne']);
+    Route::post('/admin/notification-queue/replay-failed', [NotificationQueueController::class, 'replayFailed']);
+    Route::post('/admin/notification-queue/{id}/replay', [NotificationQueueController::class, 'replayOne']);
 
     // Admin Campaigns
-    Route::get('/admin/campaigns/list', [CampaignController::class, 'list']);
-    Route::get('/admin/campaigns/get/{id}', [CampaignController::class, 'get']);
-    Route::post('/admin/campaigns/create', [CampaignController::class, 'create']);
-    Route::put('/admin/campaigns/update/{id}', [CampaignController::class, 'update']);
-    Route::delete('/admin/campaigns/delete/{id}', [CampaignController::class, 'delete']);
-    Route::post('/admin/campaigns/run/{id}', [CampaignController::class, 'run']);
-    Route::post('/admin/campaigns/dry-run/{id}', [CampaignController::class, 'dryRun']);
-    Route::get('/admin/campaigns/analytics/{id}', [CampaignController::class, 'analytics']);
-    Route::get('/admin/campaigns/audience', [CampaignController::class, 'audience']);
+    Route::get('/admin/campaigns', [CampaignController::class, 'list']);
+    Route::get('/admin/campaigns/{id}', [CampaignController::class, 'get'])->where('id', '\d+');
+    Route::post('/admin/campaigns', [CampaignController::class, 'create']);
+    Route::patch('/admin/campaigns/{id}', [CampaignController::class, 'update'])->where('id', '\d+');
+    Route::delete('/admin/campaigns/{id}', [CampaignController::class, 'delete'])->where('id', '\d+');
+    Route::post('/admin/campaigns/{id}/run', [CampaignController::class, 'run']);
+    Route::post('/admin/campaigns/{id}/dry-run', [CampaignController::class, 'dryRun']);
+    Route::post('/admin/campaigns/run-scheduled', [CampaignController::class, 'runScheduled']);
+    Route::get('/admin/campaigns/{id}/analytics', [CampaignController::class, 'analytics']);
+    Route::get('/admin/campaign-audiences/{type}', [CampaignController::class, 'audience']);
 
     // Admin Inventory
     Route::get('/admin/inventory/items', [InventoryController::class, 'itemList']);
     Route::post('/admin/inventory/items', [InventoryController::class, 'itemCreate']);
-    Route::put('/admin/inventory/items/{id}', [InventoryController::class, 'itemUpdate']);
+    Route::patch('/admin/inventory/items/{id}', [InventoryController::class, 'itemUpdate']);
     Route::get('/admin/inventory/movements', [InventoryController::class, 'movementList']);
     Route::post('/admin/inventory/adjust', [InventoryController::class, 'adjust']);
     Route::get('/admin/inventory/alerts', [InventoryController::class, 'alertList']);
@@ -323,13 +341,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/admin/inventory/suppliers', [InventoryController::class, 'supplierCreate']);
     Route::get('/admin/inventory/purchase-orders', [InventoryController::class, 'purchaseOrderList']);
     Route::post('/admin/inventory/purchase-orders', [InventoryController::class, 'purchaseOrderCreate']);
-    Route::put('/admin/inventory/purchase-orders/{id}', [InventoryController::class, 'purchaseOrderStatus']);
+    Route::patch('/admin/inventory/purchase-orders/{id}/status', [InventoryController::class, 'purchaseOrderStatus']);
+
     // Admin Stats
-    Route::get('/admin/stats/dashboard', [StatsController::class, 'dashboard']);
+    Route::get('/admin/stats', [StatsController::class, 'dashboard']);
 
     // Admin Media
-    Route::post('/admin/media/upload', [MediaController::class, 'upload']);
+    Route::post('/admin/upload', [MediaController::class, 'upload']);
 
     // Admin Inquiry Link
-    Route::post('/admin/inquiry-link/{id}', [InquiryLinkController::class, 'link']);
+    Route::post('/admin/inquiries/link-guests', [InquiryLinkController::class, 'link']);
 });

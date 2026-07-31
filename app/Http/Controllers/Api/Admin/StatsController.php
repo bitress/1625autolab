@@ -18,9 +18,7 @@ class StatsController extends Controller
             $stats = $this->statsService->getDashboardStats();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Dashboard stats retrieved.',
-                'data' => ['stats' => $stats],
+                'stats' => $stats,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

@@ -26,9 +26,7 @@ class ClientController extends Controller
         $clients = $this->userService->listClients($filters);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Clients retrieved.',
-            'data' => ['clients' => $clients],
+            'clients' => $clients,
         ]);
     }
 
@@ -37,9 +35,7 @@ class ClientController extends Controller
         $bookings = $this->bookingService->getByUserId($id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Client bookings retrieved.',
-            'data' => ['bookings' => $bookings],
+            'bookings' => $bookings,
         ]);
     }
 
@@ -48,9 +44,7 @@ class ClientController extends Controller
         $vehicles = $this->vehicleService->getByUserId($id);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Client vehicles retrieved.',
-            'data' => ['vehicles' => $vehicles],
+            'vehicles' => $vehicles,
         ]);
     }
 

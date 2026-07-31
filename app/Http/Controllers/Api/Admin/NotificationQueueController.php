@@ -20,9 +20,7 @@ class NotificationQueueController extends Controller
         $jobs = $this->jobQueue->listJobs($status, $limit);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Job queue retrieved.',
-            'data' => ['jobs' => $jobs],
+            'jobs' => $jobs,
         ]);
     }
 
@@ -33,9 +31,7 @@ class NotificationQueueController extends Controller
         $health = $this->jobQueue->getHealth($warnAfterSeconds);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Queue health retrieved.',
-            'data' => ['health' => $health],
+            'health' => $health,
         ]);
     }
 

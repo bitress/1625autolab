@@ -18,9 +18,7 @@ class ActivityLogController extends Controller
         $logs = $this->activityLogService->summarizeByUsers((string) $sort);
 
         return response()->json([
-            'success' => true,
-            'message' => 'User activity summary retrieved.',
-            'data' => ['logs' => $logs],
+            'logs' => $logs,
         ]);
     }
 
@@ -37,9 +35,7 @@ class ActivityLogController extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Activity logs retrieved.',
-            'data' => ['logs' => $logs],
+            'logs' => $logs,
         ]);
     }
 }

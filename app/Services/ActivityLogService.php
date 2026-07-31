@@ -67,11 +67,11 @@ class ActivityLogService
 
         return array_map(static function ($row) {
             return [
-                'userId'          => (int) ($row->userId ?? 0),
-                'userName'        => (string) ($row->userName ?? ''),
-                'userEmail'       => (string) ($row->userEmail ?? ''),
+                'userId' => (int) ($row->userId ?? 0),
+                'userName' => (string) ($row->userName ?? ''),
+                'userEmail' => (string) ($row->userEmail ?? ''),
                 'totalActivities' => (int) ($row->totalActivities ?? 0),
-                'lastActivityAt'  => isset($row->lastActivityAt) ? (string) $row->lastActivityAt : null,
+                'lastActivityAt' => isset($row->lastActivityAt) ? (string) $row->lastActivityAt : null,
             ];
         }, $rows->all());
     }
@@ -80,20 +80,20 @@ class ActivityLogService
     {
         // Spatie's models use 'properties' collection which parses json for us
         return [
-            'id'                => $activity->id,
-            'logName'           => $activity->log_name,
-            'description'       => $activity->description,
-            'subjectType'       => $activity->subject_type,
-            'subjectId'         => $activity->subject_id,
-            'causerType'        => $activity->causer_type,
-            'causerId'          => $activity->causer_id,
-            'properties'        => $activity->properties ? $activity->properties->toArray() : [],
-            // Spatie doesn't have an attribute_changes column by default, 
+            'id' => $activity->id,
+            'logName' => $activity->log_name,
+            'description' => $activity->description,
+            'subjectType' => $activity->subject_type,
+            'subjectId' => $activity->subject_id,
+            'causerType' => $activity->causer_type,
+            'causerId' => $activity->causer_id,
+            'properties' => $activity->properties ? $activity->properties->toArray() : [],
+            // Spatie doesn't have an attribute_changes column by default,
             // but it puts old/attributes inside properties.
-            'attribute_changes' => null, 
-            'createdAt'         => $activity->created_at ? $activity->created_at->toDateTimeString() : '',
-            'subject'           => $this->resolveEntity($activity->subject_type, (string) $activity->subject_id),
-            'causer'            => $this->resolveEntity($activity->causer_type, (string) $activity->causer_id),
+            'attribute_changes' => null,
+            'createdAt' => $activity->created_at ? $activity->created_at->toDateTimeString() : '',
+            'subject' => $this->resolveEntity($activity->subject_type, (string) $activity->subject_id),
+            'causer' => $this->resolveEntity($activity->causer_type, (string) $activity->causer_id),
         ];
     }
 
@@ -106,13 +106,13 @@ class ActivityLogService
         // Remap Laravel model types to table names for raw query if needed
         $tableName = $type;
         if (str_starts_with($type, 'App\\Models\\')) {
-            $model = new $type();
+            $model = new $type;
             $tableName = $model->getTable();
         }
 
         if (! preg_match('/^[A-Za-z0-9_]+$/', $tableName)) {
             return [
-                'id'   => $id,
+                'id' => $id,
                 'type' => $tableName,
             ];
         }
@@ -127,7 +127,7 @@ class ActivityLogService
         }
 
         return [
-            'id'   => $id,
+            'id' => $id,
             'type' => $type,
         ];
     }

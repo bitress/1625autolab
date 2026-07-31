@@ -22,9 +22,7 @@ class ServiceController extends Controller
         $services = $this->serviceCrud->getAll($includeInactive);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Services retrieved.',
-            'data' => ['services' => $services],
+            'services' => $services,
         ]);
     }
 
@@ -38,9 +36,7 @@ class ServiceController extends Controller
             $service = $this->serviceCrud->getById($id, $requireActive);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Service retrieved.',
-                'data' => ['service' => $service],
+                'service' => $service,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -60,9 +56,7 @@ class ServiceController extends Controller
             $service = $this->serviceCrud->getBySlug($slug, $requireActive);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Service retrieved.',
-                'data' => ['service' => $service],
+                'service' => $service,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -78,9 +72,7 @@ class ServiceController extends Controller
             $service = $this->serviceCrud->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Service created.',
-                'data' => ['service' => $service],
+                'service' => $service,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -96,9 +88,7 @@ class ServiceController extends Controller
             $service = $this->serviceCrud->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Service updated.',
-                'data' => ['service' => $service],
+                'service' => $service,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -131,9 +121,7 @@ class ServiceController extends Controller
             $variation = $this->serviceCrud->createVariation($serviceId, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Variation created.',
-                'data' => ['variation' => $variation],
+                'variation' => $variation,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -149,9 +137,7 @@ class ServiceController extends Controller
             $variation = $this->serviceCrud->updateVariation($serviceId, $variationId, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Variation updated.',
-                'data' => ['variation' => $variation],
+                'variation' => $variation,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

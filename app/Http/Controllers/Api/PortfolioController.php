@@ -21,9 +21,7 @@ class PortfolioController extends Controller
         $portfolios = $this->portfolioService->getAll($includeInactive);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Portfolios retrieved.',
-            'data' => ['portfolios' => $portfolios],
+            'portfolios' => $portfolios,
         ]);
     }
 
@@ -37,9 +35,7 @@ class PortfolioController extends Controller
             $portfolio = $this->portfolioService->getById($id, $requireActive);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Portfolio retrieved.',
-                'data' => ['portfolio' => $portfolio],
+                'portfolio' => $portfolio,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -55,9 +51,7 @@ class PortfolioController extends Controller
             $portfolio = $this->portfolioService->getBySlug($slug);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Portfolio retrieved.',
-                'data' => ['portfolio' => $portfolio],
+                'portfolio' => $portfolio,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -73,9 +67,7 @@ class PortfolioController extends Controller
             $portfolio = $this->portfolioService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Portfolio created.',
-                'data' => ['portfolio' => $portfolio],
+                'portfolio' => $portfolio,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -91,9 +83,7 @@ class PortfolioController extends Controller
             $portfolio = $this->portfolioService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Portfolio updated.',
-                'data' => ['portfolio' => $portfolio],
+                'portfolio' => $portfolio,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

@@ -18,9 +18,7 @@ class CustomerController extends Controller
             $stats = $this->bookingService->getCustomerStats($request->user()->id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Customer stats retrieved.',
-                'data' => ['stats' => $stats],
+                'stats' => $stats,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

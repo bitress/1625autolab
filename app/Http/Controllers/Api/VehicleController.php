@@ -20,9 +20,7 @@ class VehicleController extends Controller
             $makes = $this->vehicleService->getMakes($year);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Makes retrieved.',
-                'data' => ['makes' => $makes],
+                'makes' => $makes,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -48,9 +46,7 @@ class VehicleController extends Controller
             $models = $this->vehicleService->getModels((string) $make, $year);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Models retrieved.',
-                'data' => ['models' => $models],
+                'models' => $models,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -78,9 +74,7 @@ class VehicleController extends Controller
             $trims = $this->vehicleService->getTrims((string) $make, (string) $model, $limit, $page);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Trims retrieved.',
-                'data' => ['trims' => $trims],
+                'trims' => $trims,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

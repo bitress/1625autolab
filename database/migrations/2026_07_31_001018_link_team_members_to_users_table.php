@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('team_members', 'user_id')) {
+        if (! Schema::hasColumn('team_members', 'user_id')) {
             Schema::table('team_members', function (Blueprint $table) {
                 $table->unsignedInteger('user_id')->nullable()->after('id')->index('idx_team_members_user_id');
 

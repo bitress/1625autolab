@@ -17,9 +17,7 @@ class SiteSettingsController extends Controller
         $settings = $this->siteSettingsService->getAll();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Site settings retrieved.',
-            'data' => ['settings' => $settings],
+            'settings' => $settings,
         ]);
     }
 
@@ -29,9 +27,7 @@ class SiteSettingsController extends Controller
             $settings = $this->siteSettingsService->update($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Site settings updated.',
-                'data' => ['settings' => $settings],
+                'settings' => $settings,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

@@ -21,9 +21,7 @@ class BlogController extends Controller
         $posts = $this->blogService->getAll($publishedOnly);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Posts retrieved.',
-            'data' => ['posts' => $posts],
+            'posts' => $posts,
         ]);
     }
 
@@ -37,9 +35,7 @@ class BlogController extends Controller
             $post = $this->blogService->getById($id, $publishedOnly);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Post retrieved.',
-                'data' => ['post' => $post],
+                'post' => $post,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -55,9 +51,7 @@ class BlogController extends Controller
             $post = $this->blogService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Post created.',
-                'data' => ['post' => $post],
+                'post' => $post,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -73,9 +67,7 @@ class BlogController extends Controller
             $post = $this->blogService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Post updated.',
-                'data' => ['post' => $post],
+                'post' => $post,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

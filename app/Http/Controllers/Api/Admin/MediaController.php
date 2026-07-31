@@ -29,9 +29,7 @@ class MediaController extends Controller
             $url = $this->uploadService->upload($file, (string) $folder);
 
             return response()->json([
-                'success' => true,
-                'message' => 'File uploaded successfully.',
-                'data' => ['url' => $url],
+                'url' => $url,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

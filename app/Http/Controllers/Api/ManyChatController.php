@@ -13,20 +13,12 @@ class ManyChatController extends Controller
     {
         // TODO: implement logic that delegates to ManyChatService or similar.
         // For now, mirroring the exact signature of handleManyChatMenu()
-        return response()->json([
-            'success' => true,
-            'message' => 'ManyChat menu retrieved.',
-            'data' => [],
-        ]);
+        return response()->json([]);
     }
 
     public function drillDown(Request $request)
     {
         // TODO: implement logic that delegates to ManyChatService or similar.
-        return response()->json([
-            'success' => true,
-            'message' => 'ManyChat drill down retrieved.',
-            'data' => [],
-        ]);
+        return response()->json([]);
     }
 }

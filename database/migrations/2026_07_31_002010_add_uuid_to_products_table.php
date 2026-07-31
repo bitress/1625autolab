@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -19,7 +20,7 @@ return new class extends Migration
         // Backfill existing rows with a UUID
         $products = DB::table('products')->whereNull('uuid')->orWhere('uuid', '')->get();
         foreach ($products as $p) {
-            DB::table('products')->where('id', $p->id)->update(['uuid' => (string) \Illuminate\Support\Str::uuid()]);
+            DB::table('products')->where('id', $p->id)->update(['uuid' => (string) Str::uuid()]);
         }
 
         // Enforce NOT NULL and add unique constraint

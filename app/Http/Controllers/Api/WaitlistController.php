@@ -24,9 +24,7 @@ class WaitlistController extends Controller
             $entry = $this->waitlistService->join($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Successfully joined the waitlist.',
-                'data' => ['entry' => $entry],
+                'entry' => $entry,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -42,9 +40,7 @@ class WaitlistController extends Controller
         $entries = $this->waitlistService->getAll((string) $status);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Waitlist retrieved.',
-            'data' => ['entries' => $entries],
+            'entries' => $entries,
         ]);
     }
 
@@ -86,9 +82,7 @@ class WaitlistController extends Controller
             $claim = $this->waitlistService->getClaimByToken((string) $token);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Claim details retrieved.',
-                'data' => ['claim' => $claim],
+                'claim' => $claim,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

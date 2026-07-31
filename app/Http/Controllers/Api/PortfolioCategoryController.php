@@ -17,9 +17,7 @@ class PortfolioCategoryController extends Controller
         $categories = $this->categoryService->getAll();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Portfolio categories retrieved.',
-            'data' => ['categories' => $categories],
+            'categories' => $categories,
         ]);
     }
 
@@ -29,9 +27,7 @@ class PortfolioCategoryController extends Controller
             $category = $this->categoryService->getById($id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Category retrieved.',
-                'data' => ['category' => $category],
+                'category' => $category,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -47,9 +43,7 @@ class PortfolioCategoryController extends Controller
             $category = $this->categoryService->create($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Category created.',
-                'data' => ['category' => $category],
+                'category' => $category,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -65,9 +59,7 @@ class PortfolioCategoryController extends Controller
             $category = $this->categoryService->update($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Category updated.',
-                'data' => ['category' => $category],
+                'category' => $category,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

@@ -13,7 +13,7 @@ return new class extends Migration
         $roles = DB::table('roles')->whereIn('role_key', ['admin'])->get();
         foreach ($roles as $role) {
             $permissions = json_decode($role->permissions_json, true) ?? [];
-            if (is_array($permissions) && !in_array('chatbot:manage', $permissions)) {
+            if (is_array($permissions) && ! in_array('chatbot:manage', $permissions)) {
                 $permissions[] = 'chatbot:manage';
                 DB::table('roles')
                     ->where('id', $role->id)

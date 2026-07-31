@@ -18,9 +18,7 @@ class InventoryController extends Controller
         $items = $this->inventoryService->listItems($filters);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Inventory items retrieved.',
-            'data' => ['items' => $items],
+            'items' => $items,
         ]);
     }
 
@@ -30,9 +28,7 @@ class InventoryController extends Controller
             $item = $this->inventoryService->createItem($request->all(), $request->user()->id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Inventory item created.',
-                'data' => ['item' => $item],
+                'item' => $item,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -48,9 +44,7 @@ class InventoryController extends Controller
             $item = $this->inventoryService->updateItem($id, $request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Inventory item updated.',
-                'data' => ['item' => $item],
+                'item' => $item,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -66,9 +60,7 @@ class InventoryController extends Controller
         $movements = $this->inventoryService->listMovements($limit);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Inventory movements retrieved.',
-            'data' => ['movements' => $movements],
+            'movements' => $movements,
         ]);
     }
 
@@ -78,9 +70,7 @@ class InventoryController extends Controller
             $movement = $this->inventoryService->adjustStock($request->all(), $request->user()->id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Stock adjusted.',
-                'data' => ['movement' => $movement],
+                'movement' => $movement,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -97,9 +87,7 @@ class InventoryController extends Controller
         $alerts = $this->inventoryService->listLowStockAlerts((string) $status, $limit);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Stock alerts retrieved.',
-            'data' => ['alerts' => $alerts],
+            'alerts' => $alerts,
         ]);
     }
 
@@ -108,9 +96,7 @@ class InventoryController extends Controller
         $suppliers = $this->inventoryService->listSuppliers();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Suppliers retrieved.',
-            'data' => ['suppliers' => $suppliers],
+            'suppliers' => $suppliers,
         ]);
     }
 
@@ -120,9 +106,7 @@ class InventoryController extends Controller
             $supplier = $this->inventoryService->createSupplier($request->all());
 
             return response()->json([
-                'success' => true,
-                'message' => 'Supplier created.',
-                'data' => ['supplier' => $supplier],
+                'supplier' => $supplier,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -138,9 +122,7 @@ class InventoryController extends Controller
         $orders = $this->inventoryService->listPurchaseOrders($limit);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Purchase orders retrieved.',
-            'data' => ['orders' => $orders],
+            'orders' => $orders,
         ]);
     }
 
@@ -150,9 +132,7 @@ class InventoryController extends Controller
             $order = $this->inventoryService->createPurchaseOrder($request->all(), $request->user()->id);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Purchase order created.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ], 201);
         } catch (\Throwable $e) {
             return response()->json([
@@ -172,9 +152,7 @@ class InventoryController extends Controller
             );
 
             return response()->json([
-                'success' => true,
-                'message' => 'Purchase order status updated.',
-                'data' => ['order' => $order],
+                'order' => $order,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
