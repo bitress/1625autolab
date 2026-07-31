@@ -1,0 +1,115 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Services\UploadStorageService;
+use App\Services\VehicleCrudService;
+use Illuminate\Http\Request;
+
+class VehicleGarageController extends Controller
+{
+    public function __construct(
+        private readonly VehicleCrudService $vehicleCrud,
+        private readonly UploadStorageService $uploadService
+    ) {}
+
+    public function list(Request $request)
+    {
+        $vehicles = $this->vehicleCrud->getByUserId($request->user()->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Garage retrieved.',
+            'data' => ['vehicles' => $vehicles],
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        try {
+            $vehicle = $this->vehicleCrud->create($request->user()->id, $request->all());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehicle added to garage.',
+                'data' => ['vehicle' => $vehicle],
+            ], 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function update(Request $request, int $id)
+    {
+        try {
+            $vehicle = $this->vehicleCrud->update($id, $request->user()->id, $request->all());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehicle updated.',
+                'data' => ['vehicle' => $vehicle],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function delete(Request $request, int $id)
+    {
+        try {
+            $this->vehicleCrud->delete($id, $request->user()->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vehicle removed from garage.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function mediaUpload(Request $request, int $id)
+    {
+        if (! $request->hasFile('file')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No file provided.',
+            ], 422);
+        }
+
+        $file = $request->file('file');
+
+        try {
+            UploadStorageService::assertImageFile($file, ['image/jpeg', 'image/png', 'image/webp'], 5);
+
+            // Note: Router.php logic technically uploads first then updates the vehicle DB row.
+            $url = $this->uploadService->upload($file, 'vehicles/');
+
+            // We update the specific vehicle's photo_url
+            $vehicle = $this->vehicleCrud->update($id, $request->user()->id, ['photo_url' => $url]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo uploaded.',
+                'data' => ['vehicle' => $vehicle],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+}

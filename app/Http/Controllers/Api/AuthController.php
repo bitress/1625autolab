@@ -1,165 +1,256 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\Api\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Api\Auth\LoginRequest;
+use App\Http\Requests\Api\Auth\RegisterRequest;
+use App\Http\Requests\Api\Auth\ResetPasswordRequest;
+use App\Services\AuthSecurityService;
+use App\Services\NotificationPreferencesService;
+use App\Services\PrivacyService;
+use App\Services\TurnstileService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * Authenticate a user and return a token.
-     */
-    public function login(Request $request)
+    public function __construct(
+        private readonly UserService $userService,
+        private readonly AuthSecurityService $securityService,
+        private readonly TurnstileService $turnstile,
+        private readonly PrivacyService $privacyService,
+        private readonly NotificationPreferencesService $notificationPrefs
+    ) {}
+
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $this->turnstile->validate($request->all());
 
-        $user = User::where('email', strtolower($request->email))->first();
+        try {
+            $result = $this->userService->login($request->email, $request->password);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid email or password.'], 401);
+            $this->securityService->onLoginSuccess(
+                $result['user'],
+                $request->ip() ?? '',
+                $request->userAgent() ?? ''
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged in successfully.',
+                'data' => $result,
+            ]);
+        } catch (\Throwable $e) {
+            $this->securityService->onLoginFailure($request->email, $request->ip() ?? '');
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], $e->getCode() ?: 401);
         }
-
-        if (isset($user->is_active) && !$user->is_active) {
-            return response()->json(['message' => 'This account has been deactivated. Please contact support.'], 403);
-        }
-
-        if (array_key_exists('email_verified_at', $user->getAttributes()) && $user->email_verified_at === null) {
-            return response()->json(['message' => 'Please verify your email address before signing in.'], 403);
-        }
-
-        // Log the activity using Spatie
-        if (function_exists('activity')) {
-            activity('auth')
-                ->performedOn($user)
-                ->byUser($user)
-                ->withProperties([
-                    'email' => $user->email,
-                    'role' => $user->role ?? 'client'
-                ])
-                ->log('user_logged_in');
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role ?? 'client',
-            ]
-        ]);
     }
 
-    /**
-     * Register a new user.
-     */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:200',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
-            'phone' => 'nullable|string',
-        ]);
+        $this->turnstile->validate($request->all());
 
-        $phone = $this->normalizePhoneForStorage($request->phone ?? '');
+        try {
+            $result = $this->userService->register($request->validated());
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => strtolower($request->email),
-            'password' => Hash::make($request->password), // configured to Argon2id in config
-            'phone' => $phone,
-            'role' => 'client',
-        ]);
-
-        if (function_exists('activity')) {
-            activity('auth')
-                ->performedOn($user)
-                ->byUser($user)
-                ->withProperties(['email' => $user->email])
-                ->log('user_registered');
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful.',
+                'data' => $result,
+            ], 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], $e->getCode() ?: 400);
         }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-            ]
-        ], 201);
     }
 
-    /**
-     * Logout and revoke the token.
-     */
     public function logout(Request $request)
     {
-        $user = $request->user();
-
-        if ($user) {
-            // Revoke current token
+        if ($user = $request->user()) {
             $user->currentAccessToken()->delete();
-
-            if (function_exists('activity')) {
-                activity('auth')
-                    ->performedOn($user)
-                    ->byUser($user)
-                    ->withProperties(['role' => $user->role ?? 'client'])
-                    ->log('user_logged_out');
-            }
+            // TODO: call AuthSecurityService->onLogout($user) if needed
         }
 
-        return response()->json(['message' => 'Logged out successfully.']);
-    }
-
-    /**
-     * Get the authenticated user.
-     */
-    public function me(Request $request)
-    {
         return response()->json([
-            'user' => $request->user()
+            'success' => true,
+            'message' => 'Logged out successfully.',
         ]);
     }
 
-    /**
-     * Normalize PH mobile formats to local 11-digit form (09XXXXXXXXX).
-     */
-    private function normalizePhoneForStorage(string $phone): string
+    public function me(Request $request)
     {
-        $trimmed = trim($phone);
-        if ($trimmed === '') {
-            return '';
-        }
+        // $request->user() is a Laravel model, but we convert to array for consistency with our services
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile retrieved.',
+            'data' => [
+                'user' => $request->user()->toArray(),
+            ],
+        ]);
+    }
 
-        $digits = preg_replace('/\D+/', '', $trimmed);
-        if ($digits === null || $digits === '') {
-            return $trimmed;
-        }
+    public function refresh(Request $request)
+    {
+        // Sanctum doesn't support refresh tokens out of the box like JWT does.
+        // A common pattern is to just issue a new token and delete the old one.
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+        $newToken = $user->createToken('auth_token')->plainTextToken;
 
-        if (str_starts_with($digits, '63') && strlen($digits) === 12 && ($digits[2] ?? '') === '9') {
-            return '0' . substr($digits, 2);
-        }
-        if (str_starts_with($digits, '9') && strlen($digits) === 10) {
-            return '0' . $digits;
-        }
-        if (str_starts_with($digits, '0') && strlen($digits) === 11 && ($digits[1] ?? '') === '9') {
-            return $digits;
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Token refreshed.',
+            'data' => [
+                'token' => $newToken,
+                'user' => $user->toArray(),
+            ],
+        ]);
+    }
 
-        return $trimmed;
+    public function profile(Request $request)
+    {
+        try {
+            $updatedUser = $this->userService->updateProfile($request->user()->id, $request->all());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully.',
+                'data' => [
+                    'user' => $updatedUser,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], $e->getCode() ?: 400);
+        }
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        $this->turnstile->validate($request->all());
+
+        $this->userService->sendPasswordResetLink($request->email);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'If an account exists for that email, a password reset link has been sent.',
+        ]);
+    }
+
+    public function resetPassword(ResetPasswordRequest $request)
+    {
+        $this->turnstile->validate($request->all());
+
+        $this->userService->resetPassword($request->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset successfully. You can now log in.',
+        ]);
+    }
+
+    public function verifyEmail(Request $request)
+    {
+        try {
+            $user = $this->userService->verifyEmail($request->query('token', ''));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email verified successfully.',
+                'data' => ['user' => $user],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function resendVerification(Request $request)
+    {
+        try {
+            $this->userService->resendEmailVerification($request->user()->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Verification email sent.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    public function dataExport(Request $request)
+    {
+        try {
+            $data = $this->privacyService->exportData($request->user()->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data export complete.',
+                'data' => $data,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function accountDelete(Request $request)
+    {
+        try {
+            $this->privacyService->deleteAccount($request->user()->id);
+            $request->user()->tokens()->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Account deleted successfully.',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function notificationPrefsGet(Request $request)
+    {
+        $prefs = $this->notificationPrefs->getForUser($request->user()->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Preferences retrieved.',
+            'data' => ['preferences' => $prefs],
+        ]);
+    }
+
+    public function notificationPrefsSave(Request $request)
+    {
+        $prefs = $this->notificationPrefs->save($request->user()->id, $request->all());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Preferences saved.',
+            'data' => ['preferences' => $prefs],
+        ]);
     }
 }
