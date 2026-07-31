@@ -1,53 +1,119 @@
-<div>
-    <!-- Hero Section -->
-    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden bg-asphalt">
-        <!-- Hero Background (Slow Zoom) -->
-        <div class="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=3183&auto=format&fit=crop')] bg-cover bg-center opacity-30 animate-slow-zoom mix-blend-luminosity"></div>
-        
-        <!-- Hero Content -->
-        <div class="relative z-10 text-center max-w-4xl px-6 animate-fade-in-up">
-            <h2 class="font-signature text-brand-orange text-4xl md:text-6xl mb-4 -rotate-2">Custom Built.</h2>
-            <h1 class="font-display text-6xl md:text-8xl lg:text-9xl text-white uppercase tracking-tight leading-none mb-6 text-outline-thick">
-                Performance <br />
-                <span class="text-white text-outline-0">Unleashed.</span>
-            </h1>
-            <p class="text-lg md:text-xl text-brand-light/80 mb-10 max-w-2xl mx-auto font-sans font-light">
-                Welcome to the apex of automotive customization. Log in to access your portal, track builds, or manage operations.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/login" class="px-8 py-4 bg-brand-orange text-white font-display text-xl uppercase tracking-wider hover:scale-105 hover:bg-orange-600 transition-all duration-300 shadow-xl shadow-brand-orange/20">Client Portal</a>
-                <a href="#explore" class="px-8 py-4 bg-brand-gray text-white font-display text-xl uppercase tracking-wider hover:scale-105 hover:bg-white hover:text-black transition-all duration-300 border border-brand-gray">Explore Builds</a>
-            </div>
-        </div>
-    </section>
+    <main class="bg-brand-dark">
 
-    <!-- Features -->
-    <section id="explore" class="py-24 bg-brand-black">
-        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Feature 1 -->
-            <div class="bg-brand-gray p-8 rounded-sm hover:border-brand-orange border border-transparent transition-colors duration-300 group">
-                <div class="text-brand-orange mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h3 class="text-2xl font-display uppercase tracking-wide text-white mb-2">Tuning & Mapping</h3>
-                <p class="text-brand-light/70 font-light">Precision ECU calibration to extract maximum reliable power from your build.</p>
+        {{-- Hero --}}
+        <section class="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden">
+
+            {{-- Background Image with Overlay --}}
+            <div class="absolute inset-0 z-0 bg-asphalt">
+                <img
+                    src="https://images.unsplash.com/photo-1584345611124-287a5085e648?q=80&w=2015&auto=format&fit=crop"
+                    alt="Dark automotive garage"
+                    class="w-full h-full object-cover object-center mix-blend-overlay opacity-40"
+                    referrerpolicy="no-referrer"
+                />
+                <div class="absolute inset-0 bg-gradient-to-r from-brand-darker/95 via-brand-darker/80 to-transparent"></div>
             </div>
-            <!-- Feature 2 -->
-            <div class="bg-brand-gray p-8 rounded-sm hover:border-brand-orange border border-transparent transition-colors duration-300 group">
-                <div class="text-brand-orange mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+
+            <div class="container mx-auto px-4 md:px-6 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {{-- Text Content --}}
+                <div class="space-y-8 max-w-2xl">
+
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-orange/10 border border-brand-orange/30 rounded-full">
+                        <span class="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></span>
+                        <span class="text-brand-orange text-xs font-bold uppercase tracking-widest">
+                            Premium Auto Retrofitting
+                        </span>
+                    </div>
+
+                    <img
+                        src="https://cdn.1625autolab.com/1625autolab/logos/1625%20Autolab%20logo.png"
+                        alt="1625 Autolab"
+                        class="w-auto max-w-[320px] sm:max-w-[420px] md:max-w-[520px] object-contain"
+                        referrerpolicy="no-referrer"
+                    />
+
+                    <p class="text-gray-400 text-lg md:text-xl max-w-lg leading-relaxed border-l-4 border-brand-orange pl-4">
+                        Specializing in custom headlight retrofit and android headunit. We don't just fix cars; we upgrade them.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <a href="{{ route('services') }}"
+                           class="group relative inline-flex items-center justify-center gap-2 bg-brand-orange text-white font-display uppercase tracking-wider px-8 py-4 rounded-sm overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(255,106,0,0.4)]">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Explore Services
+                                <i class="fa-solid fa-arrow-right w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                            </span>
+                            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+                        </a>
+
+                        <a href="{{ route('booking') }}"
+                           class="group inline-flex items-center justify-center gap-2 bg-transparent border border-gray-600 text-white font-display uppercase tracking-wider px-8 py-4 rounded-sm hover:border-white hover:bg-white/5 transition-all">
+                            Book The Lab
+                            <i class="fa-solid fa-chevron-right w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
                 </div>
-                <h3 class="text-2xl font-display uppercase tracking-wide text-white mb-2">Custom Fabrication</h3>
-                <p class="text-brand-light/70 font-light">From exhaust systems to roll cages, we build exactly what you need in-house.</p>
             </div>
-            <!-- Feature 3 -->
-            <div class="bg-brand-gray p-8 rounded-sm hover:border-brand-orange border border-transparent transition-colors duration-300 group">
-                <div class="text-brand-orange mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+
+            {{-- Decorative Elements --}}
+            <div class="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/3 opacity-5 pointer-events-none overflow-hidden">
+                <span class="font-display text-[20rem] font-bold leading-none text-white whitespace-nowrap">
+                    <span class="font-fasthand">1625</span>
+                </span>
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-brand-dark to-transparent z-100"></div>
+
+
+        </section>
+
+        {{-- Quick Links Bar --}}
+        <section class="relative border-y border-gray-800 bg-brand-darker/80">
+            <div class="pointer-events-none absolute inset-0"
+                 style="background: radial-gradient(circle at 20% 50%, rgba(243,111,33,0.12), transparent 45%), radial-gradient(circle at 80% 50%, rgba(243,111,33,0.08), transparent 40%);">
+            </div>
+            <div class="container mx-auto px-4 md:px-6 py-6 relative">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+
+                    <a href="#services"
+                       class="group rounded-lg border border-gray-700 bg-brand-dark/70 px-4 py-4 transition-colors hover:border-brand-orange">
+                        <p class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-brand-orange">
+                            <i class="fa-solid fa-sparkles h-4 w-4"></i> Popular Upgrades
+                        </p>
+                        <p class="mt-2 text-sm text-gray-300 group-hover:text-white">
+                            Browse retrofit packages and core service options.
+                        </p>
+                    </a>
+
+                    <a href="{{ route('booking') }}"
+                       class="group rounded-lg border border-gray-700 bg-brand-dark/70 px-4 py-4 transition-colors hover:border-brand-orange">
+                        <p class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-brand-orange">
+                            <i class="fa-solid fa-calendar-clock h-4 w-4"></i> Fast Booking
+                        </p>
+                        <p class="mt-2 text-sm text-gray-300 group-hover:text-white">
+                            Schedule your slot in minutes with live availability.
+                        </p>
+                    </a>
+
+                    <a href="#builds"
+                       class="group rounded-lg border border-gray-700 bg-brand-dark/70 px-4 py-4 transition-colors hover:border-brand-orange">
+                        <p class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-brand-orange">
+                            <i class="fa-solid fa-shield-check h-4 w-4"></i> Real Build Proof
+                        </p>
+                        <p class="mt-2 text-sm text-gray-300 group-hover:text-white">
+                            See recent shop work, details, and finish quality.
+                        </p>
+                    </a>
+
                 </div>
-                <h3 class="text-2xl font-display uppercase tracking-wide text-white mb-2">Aero Dynamics</h3>
-                <p class="text-brand-light/70 font-light">Track-focused aerodynamic packages for stability and cornering speed.</p>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+
+        <livewire:guest.components.services-grid />
+        <livewire:guest.components.promo-banner />
+        <livewire:guest.components.recent-builds />
+        <livewire:guest.components.before-after-showcase />
+        <livewire:guest.components.testimonials />
+        <livewire:guest.components.home-faq-section />
+    </main>
