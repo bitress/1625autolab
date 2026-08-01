@@ -1,0 +1,50 @@
+@extends('emails.features.layout')
+
+@section('content')
+<p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:2px;color:#64748b;text-transform:uppercase">Admin Notification</p>
+<h2 style="margin:0 0 24px;font-size:24px;font-weight:900;color:#f1f5f9">New Booking Received</h2>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:24px">
+  <tr>
+    <td bgcolor="#f97316" style="padding:16px 20px;border-radius:8px 0 0 8px;width:50%">
+      <span style="font-size:10px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;font-family:Arial,sans-serif">Customer</span>
+      <span style="font-size:18px;font-weight:900;color:#fff;font-family:Arial,sans-serif">{!! $1 !!}</span>
+    </td>
+    <td bgcolor="#ea6b00" style="padding:16px 20px;border-radius:0 8px 8px 0">
+      <span style="font-size:10px;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px;font-family:Arial,sans-serif">Ref. Number</span>
+      <span style="font-size:18px;font-weight:900;color:#fff;font-family:Arial,sans-serif">{!! $1 !!}</span>
+    </td>
+  </tr>
+</table>
+
+<div style="background:#162032;border:1px solid #334155;border-radius:8px;overflow:hidden;margin-bottom:20px">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#64748b;font-size:13px;width:120px">Service</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#f1f5f9;font-weight:600">{!! $1 !!}</td>
+    </tr>
+    {!! $1 !!}
+    <tr>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#64748b;font-size:13px">Date &amp; Time</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#f1f5f9;font-weight:600">{!! $1 !!} &middot; {!! $1 !!}</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#64748b;font-size:13px">Vehicle</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#f1f5f9">{!! $1 !!}</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#64748b;font-size:13px">Contact</td>
+      <td style="padding:10px 16px;border-bottom:1px solid #334155;color:#f1f5f9">
+        <a href="mailto:{!! $1 !!}" style="color:#f97316;text-decoration:none">{!! $1 !!}</a>{!! $1 !!}
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:10px 16px;color:#64748b;font-size:13px">Source</td>
+      <td style="padding:10px 16px;color:#f1f5f9">{!! $1 !!}</td>
+    </tr>
+  </table>
+</div>
+
+{!! $1 !!}
+
+@endsection

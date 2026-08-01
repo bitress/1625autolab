@@ -8,15 +8,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Inquiry\CreateInquiryRequest;
 use App\Services\InquiryActivityService;
 use App\Services\InquiryService;
+use App\Services\ShopHoursService;
 use App\Services\TurnstileService;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class InquiryController extends Controller
 {
     public function __construct(
         private readonly InquiryService $inquiryService,
         private readonly InquiryActivityService $activityService,
-        private readonly TurnstileService $turnstile
+        private readonly TurnstileService $turnstile,
+        private readonly ShopHoursService $shopHoursService
     ) {}
 
     public function create(CreateInquiryRequest $request)
@@ -114,6 +117,60 @@ class InquiryController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 400);
+        }
+    }
+
+    public function calendar(Request $request)
+    {
+        try {
+            $inquiries = $this->inquiryService->getAll();
+            $events = array_map(static fn (array $inquiry): array => [
+                'id' => (string) ($inquiry['id'] ?? ''),
+                'fullName' => (string) ($inquiry['fullName'] ?? ''),
+                'email' => (string) ($inquiry['email'] ?? ''),
+                'phone' => (string) ($inquiry['phone'] ?? ''),
+                'appointmentDate' => (string) ($inquiry['appointmentDate'] ?? ''),
+                'appointmentTime' => (string) ($inquiry['appointmentTime'] ?? ''),
+                'status' => (string) ($inquiry['status'] ?? ''),
+                'serviceName' => (string) ($inquiry['serviceName'] ?? ''),
+                'createdAt' => (string) ($inquiry['createdAt'] ?? ''),
+            ], $inquiries);
+
+            return response()->json(['events' => $events]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 400);
+        }
+    }
+
+    public function availability(Request $request)
+    {
+        try {
+            $date = trim((string) $request->query('date'));
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                throw new RuntimeException('A valid date parameter (YYYY-MM-DD) is required.', 422);
+            }
+
+            $dayHours = $this->shopHoursService->getForDate($date);
+            $allSlots = $this->shopHoursService->generateSlots($dayHours);
+
+            $availability = $dayHours['isOpen']
+                ? $this->inquiryService->getAvailabilityForDate($date, $allSlots)
+                : [
+                    'availableSlots' => [],
+                    'bookedSlots' => [],
+                    'slotCounts' => [],
+                    'slotCapacity' => 2,
+                ];
+
+            return response()->json($availability);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 400);
         }
     }
 }

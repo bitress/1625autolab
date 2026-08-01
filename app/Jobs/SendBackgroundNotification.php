@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Jobs;
+
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+
+class SendBackgroundNotification implements ShouldQueue
+{
+    use Queueable;
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct(
+        public readonly string $serviceClass,
+        public readonly string $methodName,
+        public readonly array $arguments = []
+    ) {}
+
+    /**
+     * Execute the job.
+     */
+    public function handle(): void
+    {
+        $service = app($this->serviceClass);
+        $service->{$this->methodName}(...$this->arguments);
+    }
+}

@@ -73,6 +73,7 @@ Route::get('/bookings/availability', [BookingController::class, 'availability'])
 Route::post('/bookings/media', [BookingController::class, 'uploadMedia']);
 
 Route::post('/inquiries', [InquiryController::class, 'create']);
+Route::get('/inquiries/availability', [InquiryController::class, 'availability']);
 
 Route::get('/bookings/{id}/build-updates', [BuildUpdateController::class, 'list']);
 
@@ -185,7 +186,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/inquiries', [InquiryController::class, 'list']);
     Route::get('/inquiries/mine', [InquiryController::class, 'mine']);
     Route::get('/inquiries/calendar', [InquiryController::class, 'calendar']);
-    Route::get('/inquiries/availability', [InquiryController::class, 'availability']);
     Route::get('/inquiries/{id}', [InquiryController::class, 'get']);
     Route::patch('/inquiries/{id}', [InquiryController::class, 'update']);
     Route::delete('/inquiries/{id}', [InquiryController::class, 'delete']);

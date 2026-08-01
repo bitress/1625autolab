@@ -1,0 +1,33 @@
+@extends('emails.features.layout')
+
+@section('content')
+<div
+  style="font-family:Arial,sans-serif;max-width:720px;margin:0 auto;padding:24px;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:12px">
+  <div style="margin-bottom:20px">
+    <h2 style="margin:0 0 8px 0;color:#fff;font-size:24px">Appointment Reminder</h2>
+    <p style="margin:0;color:#9ca3af">Hi {!! $1 !!}!<br><br>This is a friendly reminder from 1625 AutoLab: Your appointment is at {!! $1 !!} today, which is 3 hours from now.<br>Please arrive on time or message us on our facebook page if you need to reschedule.<br><br>Thank you!</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p
+      style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+      Schedule Details</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Date:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Time:</strong> {!! $1 !!}</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p
+      style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+      Customer & Vehicle</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Name:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Vehicle:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Service / Product:</strong> {!! $1 !!}</p>
+  </div>
+
+  <p style="color:#9ca3af;font-size:13px;line-height:1.5">Please arrive on time at 1625 Auto Lab. If you need to
+    reschedule, please contact us immediately on our <a href="https://www.facebook.com/1625autolab/"
+      style="color:#f97316;text-decoration:none">Facebook page</a> or call us.</p>
+  <p style="color:#9ca3af;font-size:13px;margin-top:12px">Best regards,<br>1625 Autolab</p>
+</div>
+@endsection

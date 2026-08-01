@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'notification_queue_enabled' => env('NOTIFICATION_QUEUE_ENABLED', true),
+    'notification_queue_batch_size' => env('NOTIFICATION_QUEUE_BATCH_SIZE', 25),
+    'notification_queue_retry_delay_seconds' => env('NOTIFICATION_QUEUE_RETRY_DELAY_SECONDS', 60),
+
 ];

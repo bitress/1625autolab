@@ -1,0 +1,30 @@
+@extends('emails.features.layout')
+
+@section('content')
+<div
+  style="font-family:Arial,sans-serif;max-width:720px;margin:0 auto;padding:24px;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:12px">
+  <div style="margin-bottom:20px">
+    <h2 style="margin:0 0 8px 0;color:#fff;font-size:24px">Upcoming Appointment</h2>
+    <p style="margin:0;color:#9ca3af">Appointment Reminder: {!! $1 !!} - {!! $1 !!} is scheduled for {!! $1 !!} today (in 3 hrs). Please ensure the team and materials are ready.</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p
+      style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+      Appointment Schedule</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Date:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Time:</strong> {!! $1 !!}</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p
+      style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">
+      Customer Details</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Name:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Phone:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Email:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Vehicle:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Service / Product:</strong> {!! $1 !!}</p>
+  </div>
+</div>
+@endsection

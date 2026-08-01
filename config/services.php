@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    'turnstile' => [
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'bypass' => env('TURNSTILE_BYPASS', false),
+    ],
+
+    'semaphore' => [
+        'api_key' => env('SEMAPHORE_API_KEY'),
+        'sender_name' => env('SEMAPHORE_SENDER_NAME', '1625AutoLab'),
+        'account_cache_ttl' => env('SEMAPHORE_ACCOUNT_CACHE_TTL', 60),
+        'messages_cache_ttl' => env('SEMAPHORE_MESSAGES_CACHE_TTL', 30),
+    ],
+
+    'facebook' => [
+        'access_token' => env('FB_ACCESS_TOKEN'),
+        'graph_base' => env('FB_GRAPH_BASE', 'https://graph.facebook.com/v18.0'),
+    ],
+
 ];

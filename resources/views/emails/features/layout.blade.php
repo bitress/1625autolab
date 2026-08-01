@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>1625 Autolab</title>
+  </head>
+
+<body style="margin:0;padding:0;-webkit-font-smoothing:antialiased;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px">
+<tr>
+<td align="center">
+
+<table role="presentation" width="600" style="max-width:600px;width:100%;border-collapse:collapse">
+
+  <tr>
+    <td style="background-color:#28282B;text-align:center;border-radius:12px 12px 0 0;">
+      
+      <img 
+        src="https://cdn.1625autolab.com/1625autolab/logos/1625%20Autolab.png" 
+        alt="1625 Autolab Logo"
+        width="120"
+
+      />
+
+    </td>
+  </tr>
+
+  <tr>
+    <td style="background-color:#0f172a;padding:40px 28px;border-left:1px solid #1e293b;border-right:1px solid #1e293b;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;">
+      
+      @yield('content')
+
+    </td>
+  </tr>
+
+  <tr>
+    <td style="height:2px;background-color:#ea580c;font-size:0;line-height:0;">&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td style="background-color:#020617;padding:28px 24px;border:1px solid #1e293b;border-top:none;border-radius:0 0 12px 12px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+      
+      <p style="margin:0 0 10px;font-size:12px;color:#64748b;">
+        Need help? Contact us anytime.
+      </p>
+
+      <p style="margin:0 0 6px;">
+        <a href="tel:09393308263" style="color:#ea580c;text-decoration:none;font-weight:bold;">
+          0939 330 8263 | 0956 450 0292
+        </a>
+        <span style="color:#475569;">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+        <a href="mailto:1625autolab@gmail.com" style="color:#ea580c;text-decoration:none;font-weight:bold;">
+          1625autolab@gmail.com
+        </a>
+      </p>
+
+      <p style="margin:6px 0 0;font-size:11px;color:#475569;">
+        KM 20 Ortigas Ave Ext., Cainta, Philippines, 1900
+      </p>
+
+      <p style="margin:16px 0 0;font-size:10px;color:#334155;">
+        &copy; 2026 1625 Autolab. All rights reserved.
+      </p>
+
+    </td>
+  </tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+</body>
+</html>

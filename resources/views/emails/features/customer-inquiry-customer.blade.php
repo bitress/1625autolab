@@ -1,0 +1,42 @@
+@extends('emails.features.layout')
+
+@section('content')
+<div style="font-family:Arial,sans-serif;max-width:720px;margin:0 auto;padding:24px;background:#111827;color:#e5e7eb;border:1px solid #374151;border-radius:12px">
+  <div style="margin-bottom:20px">
+    <h2 style="margin:0 0 8px 0;color:#fff;font-size:24px">Thanks for contacting 1625 Autolab</h2>
+    <p style="margin:0;color:#9ca3af">We received your order request and we look forward to serving you.</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Customer Details</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Name:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Email:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Phone:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Address:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Facebook:</strong> {!! $1 !!}</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Vehicle Details</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Make:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Model:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Year:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Plate Number:</strong> {!! $1 !!}</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <p style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Schedule Details</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Date:</strong> {!! $1 !!}</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Time:</strong> {!! $1 !!}</p>
+  </div>
+
+  <div style="background:#1f2937;border:1px solid #374151;border-radius:10px;padding:16px 18px">
+    <p style="margin:0 0 8px 0;color:#f97316;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Order Request</p>
+    <p style="margin:4px 0;color:#f9fafb"><strong>Product / Service:</strong> {!! $1 !!}</p>
+  </div>
+
+  <p style="color:#9ca3af;font-size:13px;line-height:1.5">If any of the details above are incorrect, please reach out to us through our <a href="https://www.facebook.com/1625autolab/" style="color:#f97316;text-decoration:none">Facebook page</a>, reply to this email, or contact us at <a href="mailto:contact@1625autolab.com" style="color:#f97316;text-decoration:none">contact@1625autolab.com</a>.</p>
+  <p style="color:#9ca3af;font-size:13px;margin-top:12px">Best regards,<br>1625 Autolab</p>
+</div>
+
+@endsection

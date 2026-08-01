@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class UserService
@@ -102,13 +103,10 @@ class UserService
         if ($token) {
             $resetLink = rtrim(config('app.url'), '/').'/reset-password?token='.$token;
 
-            $jobQueue = app(NotificationJobQueueService::class);
-            // Assuming the NotificationJobQueueService implements dispatch method
-            if (method_exists($jobQueue, 'dispatch')) {
-                $jobQueue->dispatch('password_reset_requested', [
-                    'email' => $email,
-                    'resetLink' => $resetLink,
-                ]);
+            try {
+                app(NotificationService::class)->passwordReset($email, $resetLink);
+            } catch (\Throwable $e) {
+                Log::error('[UserService] Password reset dispatch failed: '.$e->getMessage());
             }
         }
     }
@@ -825,17 +823,13 @@ class UserService
 
             $verifyUrl = rtrim(config('app.url'), '/').'/login?verifyToken='.urlencode($token);
 
-            // Dispatch to NotificationJobQueueService if it exists
-            $jobQueue = app(NotificationJobQueueService::class);
-            if (method_exists($jobQueue, 'dispatch')) {
-                $jobQueue->dispatch('email_verification', [
-                    'email' => $email,
-                    'name' => $name,
-                    'verifyUrl' => $verifyUrl,
-                ]);
+            try {
+                app(NotificationService::class)->sendEmailVerification($email, $name, $verifyUrl);
+            } catch (\Throwable $e) {
+                Log::error('[UserService] Email verification dispatch failed: '.$e->getMessage());
             }
         } catch (\Throwable $e) {
-            error_log('[UserService] Email verification dispatch failed: '.$e->getMessage());
+            Log::error('[UserService] Email verification process failed: '.$e->getMessage());
         }
     }
 

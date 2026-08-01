@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Jobs\SendBackgroundNotification;
 use Carbon\Carbon;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -38,22 +39,13 @@ class NotificationJobQueueService
             return;
         }
 
-        DB::table('notification_jobs')->insert([
-            'event' => $event,
-            'payload' => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'status' => 'queued',
-            'run_after' => $runAfter ?? Carbon::now(),
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
+        $job = new SendBackgroundNotification(self::class, 'handleNow', [$event, $payload]);
 
-        if (PHP_SAPI !== 'cli' && ($runAfter === null || strtotime($runAfter) <= time())) {
-            try {
-                $this->processPending(1);
-            } catch (\Throwable $e) {
-                error_log('[NotificationJobQueueService] Immediate queue processing failed: '.$e->getMessage());
-            }
+        if ($runAfter !== null) {
+            $job->delay(Carbon::parse($runAfter));
         }
+
+        dispatch($job);
     }
 
     /**

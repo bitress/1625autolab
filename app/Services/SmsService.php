@@ -1,21 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
-namespace App\Services;
-
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-
 /**
  * Sends SMS notifications via the Semaphore REST API.
  *
- * Booking alert recipients are active owner/admin users from DB
- * (filtered by SMS notification preferences).
+ * Configuration (set in .env / Configuration.php):
+ *   SEMAPHORE_API_KEY     - Semaphore API key
+ *   SEMAPHORE_SENDER_NAME - Approved sender name (default: "1625AutoLab")
+ *   Booking alert recipients are active owner/admin users from DB
+ *   (filtered by SMS notification preferences).
  *
  * All methods fail silently when Semaphore credentials are not configured, so
  * the booking flow is never interrupted by missing SMS setup.
+ *
+ * API reference: https://www.semaphore.co/docs
  */
 class SmsService
 {
@@ -27,8 +24,9 @@ class SmsService
 
     private bool $enabled;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly UserNotificationService $userNotificationService
+    ) {
         $this->apiKey = config('services.semaphore.api_key', '');
         $this->senderName = config('services.semaphore.sender_name', '1625AutoLab');
         $this->enabled = $this->apiKey !== '';
@@ -360,13 +358,13 @@ class SmsService
         }
 
         // Respect the technician's SMS assignment preference when we have their user ID.
-        if ($techUserId !== null && class_exists(NotificationPreferencesService::class)) {
+        if ($techUserId !== null) {
             try {
                 $prefs = app(NotificationPreferencesService::class);
                 if (! $prefs->smsEnabled($techUserId, 'assignment')) {
                     return;
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Preferences unavailable – send anyway.
             }
         }
@@ -418,28 +416,30 @@ class SmsService
     private function fetchAlertRecipients(string $smsType): array
     {
         try {
-            $users = DB::table('users')
-                ->select('id', 'phone')
-                ->whereIn('role', ['admin', 'owner'])
-                ->whereNotNull('phone')
-                ->where('phone', '!=', '')
-                ->where(function ($query) {
-                    $query->whereNull('is_active')
-                        ->orWhere('is_active', 1);
-                })
-                ->get();
-        } catch (\Throwable) {
+            $db = Database::getInstance();
+            $stmt = $db->query(
+                "SELECT u.id, u.phone
+                 FROM users u
+                 WHERE u.role IN ('admin', 'owner')
+                   AND u.phone IS NOT NULL
+                   AND u.phone <> ''
+                   AND (u.is_active IS NULL OR u.is_active = 1)"
+            );
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable) {
             return [];
         }
 
-        $prefs = class_exists(NotificationPreferencesService::class)
-            ? app(NotificationPreferencesService::class)
-            : null;
+        try {
+            $prefs = app(NotificationPreferencesService::class);
+        } catch (Throwable) {
+            $prefs = null;
+        }
 
         $phones = [];
-        foreach ($users as $row) {
-            $userId = (int) $row->id;
-            $phone = $this->normalisePhone((string) $row->phone);
+        foreach ($rows as $row) {
+            $userId = (int) ($row['id'] ?? 0);
+            $phone = $this->normalisePhone((string) ($row['phone'] ?? ''));
             if ($phone === '') {
                 continue;
             }
@@ -454,7 +454,11 @@ class SmsService
     }
 
     /**
-     * POST to the Semaphore Messages API using Laravel's Http facade.
+     * POST to the Semaphore Messages API.
+     *
+     * Uses Guzzle (already a project dependency) with a 10-second timeout.
+     * Any exception is caught and logged to PHP's error log so the booking
+     * flow is never interrupted by an SMS failure.
      */
     private function send(string $to, string $body): void
     {
@@ -463,31 +467,19 @@ class SmsService
         }
 
         try {
-            $response = Http::timeout(10)
-                ->asForm()
-                ->acceptJson()
-                ->post(self::API_URL, [
-                    'apikey' => $this->apiKey,
-                    'number' => $to,
-                    'message' => $body,
-                    'sendername' => $this->senderName,
-                ]);
+            $response = Http::timeout(10)->asForm()->post(self::API_URL, [
+                'apikey' => $this->apiKey,
+                'number' => $to,
+                'message' => $body,
+                'sendername' => $this->senderName,
+            ]);
 
             if ($response->failed()) {
-                $errorMessage = $response->json('message') ?? $response->body();
-                if (trim($errorMessage) === '') {
-                    $errorMessage = 'Unknown Semaphore error';
-                }
-
-                Log::error('[SmsService] Semaphore SMS failed for '.substr($to, 0, 4).'****', [
-                    'status' => $response->status(),
-                    'error' => $errorMessage,
-                ]);
+                $errorMessage = $response->json('message') ?? $response->body() ?? 'Unknown error';
+                Log::error('[SmsService] Semaphore SMS failed for '.substr($to, 0, 4).'**** with status '.$response->status().': '.$errorMessage);
             }
-        } catch (\Throwable $e) {
-            Log::error('[SmsService] Failed to send SMS to '.substr($to, 0, 4).'****', [
-                'exception' => $e->getMessage(),
-            ]);
+        } catch (Throwable $e) {
+            Log::error('[SmsService] Failed to send SMS to '.substr($to, 0, 4).'****: '.$e->getMessage());
         }
     }
 
