@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class InquirySlotOccupancy extends Model
@@ -27,7 +28,7 @@ class InquirySlotOccupancy extends Model
         'appointment_date' => 'date',
     ];
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
         static::creating(function ($model) {
@@ -37,7 +38,7 @@ class InquirySlotOccupancy extends Model
         });
     }
 
-    public function inquiry()
+    public function inquiry(): BelongsTo
     {
         return $this->belongsTo(CustomerInquiry::class, 'inquiry_id', 'id');
     }

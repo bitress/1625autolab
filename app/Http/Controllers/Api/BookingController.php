@@ -139,7 +139,8 @@ class BookingController extends Controller
 
         try {
             $this->accessService->requireBookingMutationForPayload($payload, $id);
-            $techId = $request->input('techId');
+            // Accept both camelCase variants sent by the frontend
+            $techId = $request->input('assignedTechId') ?? $request->input('techId');
 
             $booking = $this->bookingService->assignTechnician(
                 $id,
@@ -230,7 +231,7 @@ class BookingController extends Controller
             $activities = $this->activityService->getForBooking($id);
 
             return response()->json([
-                'activities' => $activities,
+                'logs' => $activities,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -330,6 +331,140 @@ class BookingController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 400);
+        }
+    }
+
+    /**
+     * PATCH /api/bookings/{id}
+     * General-purpose status update (used by frontend updateBookingStatusApi).
+     */
+    public function update(Request $request, string $id)
+    {
+        $payload = $request->user()->toArray();
+
+        try {
+            $this->accessService->requireBookingMutationForPayload($payload, $id);
+            $status = $request->input('status');
+
+            $booking = $this->bookingService->updateStatus(
+                $id,
+                $status,
+                $request->user()->id,
+                $request->user()->role ?? 'staff'
+            );
+
+            return response()->json(['booking' => $booking]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 400);
+        }
+    }
+
+    /**
+     * PATCH /api/bookings/{id}/admin-reschedule
+     * Admin/staff override reschedule (bypasses user ownership check).
+     */
+    public function adminReschedule(Request $request, string $id)
+    {
+        $payload = $request->user()->toArray();
+
+        try {
+            $this->accessService->requireBookingMutationForPayload($payload, $id);
+
+            $booking = $this->bookingService->adminReschedule(
+                $id,
+                (string) $request->input('appointmentDate', ''),
+                (string) $request->input('appointmentTime', ''),
+                $request->user()->id,
+                $request->user()->role ?? 'admin'
+            );
+
+            return response()->json(['booking' => $booking]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * PATCH /api/bookings/{id}/qa-photos
+     * Update before/after QA photo URLs for a booking.
+     */
+    public function qaPhotosUpdate(Request $request, string $id)
+    {
+        $payload = $request->user()->toArray();
+
+        try {
+            $this->accessService->requireBookingMutationForPayload($payload, $id);
+
+            $stage = (string) $request->input('stage', 'before'); // 'before' | 'after'
+            $photoUrls = (array) $request->input('photoUrls', []);
+
+            $booking = $this->bookingService->updateQaPhotos(
+                $id,
+                $stage,
+                $photoUrls,
+                $request->user()->id
+            );
+
+            return response()->json(['booking' => $booking]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 400);
+        }
+    }
+
+    /**
+     * PATCH /api/bookings/{id}/calibration
+     * Update calibration certificate data for a booking.
+     */
+    public function calibrationUpdate(Request $request, string $id)
+    {
+        $payload = $request->user()->toArray();
+
+        try {
+            $this->accessService->requireBookingMutationForPayload($payload, $id);
+
+            $booking = $this->bookingService->updateCalibrationData(
+                $id,
+                $request->only(['beamAngle', 'luxOutput', 'notes']),
+                $request->user()->id,
+                $request->user()->role ?? 'staff'
+            );
+
+            return response()->json(['booking' => $booking]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 400);
+        }
+    }
+
+    /**
+     * DELETE /api/bookings/{id}
+     * Hard-delete a booking (admin/owner only via access service).
+     */
+    public function delete(Request $request, string $id)
+    {
+        $payload = $request->user()->toArray();
+
+        try {
+            $this->accessService->requireBookingMutationForPayload($payload, $id);
+            $this->bookingService->delete($id);
+
+            return response()->json(['deleted' => true]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 404);
         }
     }
 

@@ -66,6 +66,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/auth/verify-email', [AuthController::class, 'verifyEmail']);
+Route::middleware(['optional.auth'])->post('/auth/resend-verification', [AuthController::class, 'resendVerification']);
 
 Route::post('/bookings', [BookingController::class, 'create']);
 Route::post('/booking/external', [BookingController::class, 'externalCreate']);
@@ -156,7 +157,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
     Route::put('/auth/profile', [AuthController::class, 'profile']);
     Route::post('/auth/avatar-upload', [AuthController::class, 'avatarUpload']); // Added based on snippet
-    Route::post('/auth/resend-verification', [AuthController::class, 'resendVerification']);
     Route::get('/auth/data-export', [AuthController::class, 'dataExport']);
     Route::delete('/auth/account', [AuthController::class, 'accountDelete']);
     Route::get('/auth/notification-preferences', [AuthController::class, 'notificationPrefsGet']);
@@ -186,6 +186,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/inquiries', [InquiryController::class, 'list']);
     Route::get('/inquiries/mine', [InquiryController::class, 'mine']);
     Route::get('/inquiries/calendar', [InquiryController::class, 'calendar']);
+
     Route::get('/inquiries/{id}', [InquiryController::class, 'get']);
     Route::patch('/inquiries/{id}', [InquiryController::class, 'update']);
     Route::delete('/inquiries/{id}', [InquiryController::class, 'delete']);

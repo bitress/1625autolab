@@ -6,13 +6,14 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\ActivityLogService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ActivityLogController extends Controller
 {
     public function __construct(private readonly ActivityLogService $activityLogService) {}
 
-    public function users(Request $request)
+    public function users(Request $request): JsonResponse
     {
         $sort = $request->query('sort', 'most_recent');
         $logs = $this->activityLogService->summarizeByUsers((string) $sort);
@@ -22,7 +23,7 @@ class ActivityLogController extends Controller
         ]);
     }
 
-    public function list(Request $request)
+    public function list(Request $request): JsonResponse
     {
         $userId = $request->query('user_id');
         $limit = (int) $request->query('limit', 200);

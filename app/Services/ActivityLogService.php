@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\DB;
-use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogService
 {
@@ -13,7 +13,7 @@ class ActivityLogService
     {
         $limit = max(1, min(1000, $limit));
 
-        $activities = Activity::orderBy('id', 'asc')
+        $activities = ActivityLog::orderBy('id', 'desc')
             ->limit($limit)
             ->get();
 
@@ -24,7 +24,7 @@ class ActivityLogService
     {
         $limit = max(1, min(2000, $limit));
 
-        $query = Activity::whereIn('causer_type', ['users', 'user', 'App\\Models\\User']);
+        $query = ActivityLog::whereIn('causer_type', ['users', 'user', 'App\\Models\\User']);
 
         if ($userId !== null && $userId > 0) {
             $query->where('causer_id', $userId);
@@ -41,9 +41,9 @@ class ActivityLogService
     {
         $sort = strtolower(trim((string) $sort));
 
-        $orderBy = 'MAX(activity_log.created_at) DESC, totalActivities DESC, users.name ASC';
+        $orderBy = 'MAX(activity_logs.created_at) DESC, totalActivities DESC, users.name ASC';
         if ($sort === 'most_active') {
-            $orderBy = 'totalActivities DESC, MAX(activity_log.created_at) DESC, users.name ASC';
+            $orderBy = 'totalActivities DESC, MAX(activity_logs.created_at) DESC, users.name ASC';
         } elseif ($sort === 'name_asc') {
             $orderBy = 'users.name ASC, totalActivities DESC';
         } elseif ($sort === 'name_desc') {
@@ -51,17 +51,17 @@ class ActivityLogService
         }
 
         // We use DB facade here because of the complex GROUP BY and raw expressions
-        $rows = DB::table('activity_log')
-            ->join('users', 'users.id', '=', DB::raw('CAST(activity_log.causer_id AS UNSIGNED)'))
-            ->whereIn('activity_log.causer_type', ['users', 'user', 'App\\Models\\User'])
+        $rows = DB::table('activity_logs')
+            ->join('users', 'users.id', '=', DB::raw('CAST(activity_logs.causer_id AS UNSIGNED)'))
+            ->whereIn('activity_logs.causer_type', ['users', 'user', 'App\\Models\\User'])
             ->select(
-                DB::raw('CAST(activity_log.causer_id AS UNSIGNED) as userId'),
+                DB::raw('CAST(activity_logs.causer_id AS UNSIGNED) as userId'),
                 'users.name as userName',
                 'users.email as userEmail',
                 DB::raw('COUNT(*) as totalActivities'),
-                DB::raw('MAX(activity_log.created_at) as lastActivityAt')
+                DB::raw('MAX(activity_logs.created_at) as lastActivityAt')
             )
-            ->groupBy(DB::raw('CAST(activity_log.causer_id AS UNSIGNED)'), 'users.name', 'users.email')
+            ->groupBy(DB::raw('CAST(activity_logs.causer_id AS UNSIGNED)'), 'users.name', 'users.email')
             ->orderByRaw($orderBy)
             ->get();
 
@@ -76,9 +76,8 @@ class ActivityLogService
         }, $rows->all());
     }
 
-    private function formatActivity(Activity $activity): array
+    private function formatActivity(ActivityLog $activity): array
     {
-        // Spatie's models use 'properties' collection which parses json for us
         return [
             'id' => $activity->id,
             'logName' => $activity->log_name,
@@ -87,10 +86,8 @@ class ActivityLogService
             'subjectId' => $activity->subject_id,
             'causerType' => $activity->causer_type,
             'causerId' => $activity->causer_id,
-            'properties' => $activity->properties ? $activity->properties->toArray() : [],
-            // Spatie doesn't have an attribute_changes column by default,
-            // but it puts old/attributes inside properties.
-            'attribute_changes' => null,
+            'properties' => is_array($activity->properties_json) ? $activity->properties_json : [],
+            'attribute_changes' => is_array($activity->attribute_changes_json) ? $activity->attribute_changes_json : null,
             'createdAt' => $activity->created_at ? $activity->created_at->toDateTimeString() : '',
             'subject' => $this->resolveEntity($activity->subject_type, (string) $activity->subject_id),
             'causer' => $this->resolveEntity($activity->causer_type, (string) $activity->causer_id),

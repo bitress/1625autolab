@@ -74,7 +74,7 @@ class VehicleGarageController extends Controller
         }
     }
 
-    public function mediaUpload(Request $request, int $id)
+    public function mediaUpload(Request $request)
     {
         if (! $request->hasFile('file')) {
             return response()->json([
@@ -88,14 +88,10 @@ class VehicleGarageController extends Controller
         try {
             UploadStorageService::assertImageFile($file, ['image/jpeg', 'image/png', 'image/webp'], 5);
 
-            // Note: Router.php logic technically uploads first then updates the vehicle DB row.
             $url = $this->uploadService->upload($file, 'vehicles/');
 
-            // We update the specific vehicle's photo_url
-            $vehicle = $this->vehicleCrud->update($id, $request->user()->id, ['photo_url' => $url]);
-
             return response()->json([
-                'vehicle' => $vehicle,
+                'url' => $url,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

@@ -34,10 +34,7 @@ class NotificationController extends Controller
         try {
             $this->notificationService->markRead($id, $isAdmin, $request->user()->id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification marked as read.',
-            ]);
+            return response()->json(['ok' => true]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -54,10 +51,7 @@ class NotificationController extends Controller
         try {
             $this->notificationService->markAllRead($isAdmin, $request->user()->id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'All notifications marked as read.',
-            ]);
+            return response()->json(['ok' => true]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -74,10 +68,7 @@ class NotificationController extends Controller
         try {
             $this->notificationService->delete($id, $isAdmin, $request->user()->id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Notification deleted.',
-            ]);
+            return response()->json(['ok' => true]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,

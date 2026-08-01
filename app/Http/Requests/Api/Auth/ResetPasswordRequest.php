@@ -8,6 +8,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ResetPasswordRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('passwordConfirm') && ! $this->has('password_confirmation')) {
+            $this->merge([
+                'password_confirmation' => $this->input('passwordConfirm'),
+            ]);
+        }
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -18,7 +27,6 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'token' => ['required', 'string'],
-            'email' => ['required', 'email', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }

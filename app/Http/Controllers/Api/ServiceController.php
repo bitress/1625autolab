@@ -115,6 +115,20 @@ class ServiceController extends Controller
         }
     }
 
+    public function variationList(Request $request, int $serviceId)
+    {
+        try {
+            $variations = $this->serviceCrud->getVariations($serviceId);
+
+            return response()->json(['variations' => $variations]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], ((int) $e->getCode() >= 400 && (int) $e->getCode() <= 599) ? (int) $e->getCode() : 404);
+        }
+    }
+
     public function variationCreate(Request $request, int $serviceId)
     {
         try {
